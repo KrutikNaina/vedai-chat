@@ -3,7 +3,7 @@ import { testimonials } from "../constants";
 
 const Testimonials = () => {
   return (
-    <section className="relative mt-20 tracking-wide min-h-[900px] overflow-hidden">
+    <section className="relative -mt-20 tracking-wide min-h-[900px] overflow-hidden">
       {/* Background cosmic particles */}
       {[...Array(30)].map((_, i) => (
         <motion.div

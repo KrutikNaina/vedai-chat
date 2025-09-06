@@ -36,7 +36,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col bg-gradient-to-br from-black via-orange-950 to-black text-white">
+    <div className="relative min-h-screen w-full flex flex-col bg-gradient-to-br from-black  to-black text-white">
       {/* Floating cosmic particles */}
       {[...Array(35)].map((_, i) => (
         <motion.div

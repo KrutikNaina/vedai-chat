@@ -1,14 +1,15 @@
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import logo from "../assets/logo.png";
+import logo from "../assets/VedAI.png";
+import { Link } from "react-router-dom";
 
 // Updated nav items
 const navItems = [
-  { label: "Home", href: "#" },
+  { label: "Home", href: "/" },
   { label: "Chat", href: "/chatpage" },
-  { label: "Baby Name", href: "#baby-name" },
-  { label: "About", href: "#about" },
-  { label: "Blog", href: "#blog" },
+  { label: "Baby Name", href: "/rashiname" },
+  { label: "About", href: "/about" },
+  { label: "Blog", href: "/blog" }, // ✅ fixed from "#blog"
 ];
 
 const Navbar = () => {
@@ -24,27 +25,37 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
-            <img className="h-10 w-10 mr-2" src={logo} alt="Logo" />
-            <span className="text-xl tracking-tight">VirtualR</span>
+            <Link to="/">
+              <img
+                className="h-24 -mt-6 -mb-6 mr-2 cursor-pointer hover:scale-105 hover:drop-shadow-[0_0_5px_#ff6a00]"
+                src={logo}
+                alt="Logo"
+              />
+            </Link>
           </div>
 
           {/* Desktop nav links */}
           <ul className="hidden lg:flex ml-14 space-x-8">
             {navItems.map((item, index) => (
               <li key={index}>
-                <a href={item.href} className="hover:text-orange-500 transition">
+                <Link
+                  to={item.href}
+                  className="hover:text-orange-500 transition"
+                >
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
 
           {/* Desktop buttons */}
           <div className="hidden lg:flex justify-center space-x-4 items-center">
-            <a href="/login" className="py-2 px-3 border rounded-md hover:border-orange-500">
+            <Link
+              to="/login"
+              className="py-2 px-3 border rounded-md hover:border-orange-500"
+            >
               Login
-            </a>
-           
+            </Link>
           </div>
 
           {/* Mobile toggle */}
@@ -61,27 +72,30 @@ const Navbar = () => {
             <ul className="space-y-6 text-2xl">
               {navItems.map((item, index) => (
                 <li key={index}>
-                  <a href={item.href} onClick={() => setMobileDrawerOpen(false)}>
+                  <Link
+                    to={item.href}
+                    onClick={() => setMobileDrawerOpen(false)}
+                  >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
             <div className="flex flex-col space-y-4 mt-10 w-full items-center">
-              <a
-                href="/login"
+              <Link
+                to="/login"
                 onClick={() => setMobileDrawerOpen(false)}
                 className="w-3/4 text-center py-3 border rounded-md hover:border-orange-500"
               >
                 Login
-              </a>
-              <a
-                href="/login"
+              </Link>
+              <Link
+                to="/signup"
                 onClick={() => setMobileDrawerOpen(false)}
                 className="w-3/4 text-center py-3 rounded-md bg-gradient-to-r from-orange-500 to-orange-800 hover:from-orange-600 hover:to-orange-900 transition"
               >
                 Sign Up
-              </a>
+              </Link>
             </div>
           </div>
         )}

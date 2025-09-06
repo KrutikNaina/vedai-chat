@@ -9,6 +9,8 @@ import Testimonials from "./components/Testimonials";
 import Login from "./auth/login";
 import Signup from "./auth/Signup";
 import ChatPage from "./pages/ChatPage";
+import RashiName from "./pages/RashiName"
+import About from "./pages/About";
 
 const App = () => {
   return (
@@ -35,7 +37,8 @@ const App = () => {
 
         {/* All Pages */}
         <Route path="/chatpage" element={<ChatPage/>}/>
-
+        <Route path="/rashiname" element={<RashiName/>}/>
+        <Route path="/about" element={<About/>}/>
 
       </Routes>
     </Router>

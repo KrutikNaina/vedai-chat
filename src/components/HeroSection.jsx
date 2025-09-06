@@ -31,8 +31,8 @@ export default function VedAICosmicHero() {
   }, [glowControls]);
 
   return (
-    <section className="relative  min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 lg:px-20">
-      
+    <section className="relative min-h-screen flex flex-col items-center justify-start overflow-hidden px-6 lg:px-20 -mt-10 lg:-mt-24">
+
       {/* ======= Multi-layer Galaxy Background ======= */}
       {/* Stars Layer */}
       {[...Array(100)].map((_, i) => (
