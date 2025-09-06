@@ -154,10 +154,11 @@ export default function VedAICosmicHero() {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.3 }}
-          className="relative w-full h-[500px] md:h-[600px] flex items-center justify-center"
+          className="relative w-full md:w-auto h-[400px] md:h-[600px] flex items-center justify-center
+             -mr-4 sm:-mr-6 md:mr-0" // Negative margin-right on small screens
         >
           <motion.div
-            className="relative w-80 md:w-96 h-96 bg-neutral-900/60 border border-orange-400/20 rounded-3xl backdrop-blur-xl shadow-[0_0_100px_rgba(255,140,0,0.3)] overflow-hidden"
+            className="relative w-72 sm:w-80 md:w-96 h-72 sm:h-80 md:h-96 bg-neutral-900/60 border border-orange-400/20 rounded-3xl backdrop-blur-xl shadow-[0_0_100px_rgba(255,140,0,0.3)] overflow-hidden"
             style={{ transform: `rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)` }}
             transition={{ type: "spring", stiffness: 140, damping: 16 }}
           >
@@ -169,7 +170,7 @@ export default function VedAICosmicHero() {
                 return (
                   <motion.div
                     key={i}
-                    className="absolute w-16 h-16 rounded-full bg-orange-500/20 border border-orange-400/50 flex items-center justify-center text-sm text-white font-semibold shadow-lg"
+                    className="absolute w-12 sm:w-16 h-12 sm:h-16 rounded-full bg-orange-500/20 border border-orange-400/50 flex items-center justify-center text-xs sm:text-sm text-white font-semibold shadow-lg"
                     style={{
                       top: `${10 + i * 12 + offsetY}%`,
                       left: `${10 + (i * 15) % 60 + offsetX}%`,
@@ -191,7 +192,7 @@ export default function VedAICosmicHero() {
             {[...Array(12)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute h-[2px] w-full bg-orange-400/30 rounded-full"
+                className="absolute h-[1.5px] w-full bg-orange-400/30 rounded-full"
                 style={{ top: `${Math.random() * 100}%` }}
                 animate={{ x: ["-100%", "100%"] }}
                 transition={{
@@ -204,6 +205,7 @@ export default function VedAICosmicHero() {
             ))}
           </motion.div>
         </motion.div>
+
       </div>
     </section>
   );
