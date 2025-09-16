@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { Typewriter } from "react-simple-typewriter";
 import { Zap } from "lucide-react";
+import { Link } from "react-router-dom";
+
 
 export default function VedAICosmicHero() {
   const panelRef = useRef(null);
@@ -57,7 +59,7 @@ export default function VedAICosmicHero() {
       ))}
 
       {/* Nebula Clouds */}
-      {[...Array(5)].map((_, i) => (
+      {[...Array(3)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full"
@@ -79,7 +81,7 @@ export default function VedAICosmicHero() {
       ))}
 
       {/* Constellation Lines */}
-      {[...Array(20)].map((_, i) => (
+      {[...Array(12)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute bg-orange-400/20"
@@ -141,8 +143,9 @@ export default function VedAICosmicHero() {
             animate={glowControls}
             whileHover={{ scale: 1.05, rotate: 1 }}
             className="mt-6 px-8 py-4 rounded-3xl bg-gradient-to-r from-orange-500 to-orange-700 text-white font-bold shadow-xl hover:shadow-2xl transition-all"
-          >
+          ><Link to="/chatpage">
             🌟 Ask VedAI
+            </Link>
           </motion.button>
         </motion.div>
 

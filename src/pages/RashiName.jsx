@@ -1,13 +1,38 @@
 // src/pages/RashiName.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Baby, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 export default function RashiName() {
   const [gender, setGender] = useState("boy");
   const [rashi, setRashi] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  // Check if user is logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login"); // redirect if no token
+    } else {
+      fetch("http://localhost:5000/auth/user", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Invalid token");
+          return res.json();
+        })
+        .then(() => setAuthLoading(false))
+        .catch(() => {
+          localStorage.removeItem("token");
+          navigate("/login");
+        });
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,8 +56,10 @@ export default function RashiName() {
     setLoading(false);
   };
 
+  if (authLoading) return <div className="text-white p-6">Loading...</div>;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950  flex flex-col items-center justify-center px-6 py-16">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 flex flex-col items-center justify-center px-6 py-16">
       {/* Heading */}
       <motion.h1
         initial={{ y: -40, opacity: 0 }}
