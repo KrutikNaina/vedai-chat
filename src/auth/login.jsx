@@ -1,6 +1,6 @@
 import { FcGoogle } from "react-icons/fc";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -24,13 +24,10 @@ const Login = () => {
 
       if (event.data?.type === "oauth-success") {
         localStorage.setItem("token", event.data.token);
-
-        // 🔥 Dispatch tokenUpdated event so Navbar reloads user instantly
-        window.dispatchEvent(new Event("tokenUpdated"));
-
+        window.dispatchEvent(new Event("tokenUpdated")); // Notify app of login
         popup?.close();
 
-        // Decode JWT to get user info (optional debug)
+        // Optional: decode JWT for info
         const payload = JSON.parse(atob(event.data.token.split(".")[1]));
         console.log("Logged in user:", payload);
 
@@ -44,12 +41,11 @@ const Login = () => {
 
     const timer = setInterval(() => {
       if (popup?.closed) {
-        clearInterval(timer);
+        clearInterval(timer); // fixed typo
         window.removeEventListener("message", messageHandler);
       }
     }, 500);
   };
-
 
   return (
     <section className="relative flex items-center justify-center min-h-screen bg-gradient-to-b from-black via-neutral-900 to-black text-white px-6">

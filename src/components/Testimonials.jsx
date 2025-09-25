@@ -3,9 +3,9 @@ import { testimonials } from "../constants";
 
 const Testimonials = () => {
   return (
-    <section className="relative -mt-20 tracking-wide min-h-[900px] overflow-hidden">
-      {/* Background cosmic particles */}
-      {[...Array(30)].map((_, i) => (
+    <section className="relative w-full min-h-screen py-20 overflow-hidden bg-gradient-to-b ">
+      {/* Cosmic floating particles */}
+      {[...Array(40)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full bg-orange-500/20"
@@ -30,72 +30,8 @@ const Testimonials = () => {
         />
       ))}
 
-      <div className="text-center relative z-10">
-        <span className="bg-neutral-900 text-orange-500 rounded-full h-6 text-sm font-medium px-3 py-1 uppercase tracking-wider">
-          Testimonials
-        </span>
-        <h2 className="text-3xl sm:text-5xl lg:text-6xl my-10 lg:my-20">
-          What People Are Saying
-        </h2>
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-8 relative z-10">
-        {testimonials.map((testimonial, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: index * 0.3 }}
-            className="w-full sm:w-1/2 lg:w-1/3 px-4"
-          >
-            <div className="bg-neutral-900/80 backdrop-blur-md rounded-3xl p-6 border border-neutral-800 shadow-[0_0_40px_rgba(255,140,0,0.2)] hover:shadow-[0_0_80px_rgba(255,165,0,0.35)] transition-all duration-500 relative">
-              {/* Decorative floating orbs */}
-              {[...Array(3)].map((_, orbIndex) => (
-                <motion.div
-                  key={orbIndex}
-                  className="absolute rounded-full bg-orange-400/30"
-                  style={{
-                    width: 6 + Math.random() * 4,
-                    height: 6 + Math.random() * 4,
-                    top: `${10 + orbIndex * 25}%`,
-                    right: `${5 + orbIndex * 20}%`,
-                  }}
-                  animate={{
-                    y: [0, -6, 0],
-                    x: [0, 4, 0],
-                  }}
-                  transition={{
-                    duration: 4 + orbIndex,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: orbIndex * 0.2,
-                  }}
-                />
-              ))}
-
-              <p className="text-md text-neutral-300">{testimonial.text}</p>
-
-              <div className="flex mt-6 items-start">
-                <img
-                  className="w-14 h-14 mr-4 rounded-full border border-neutral-700 shadow-sm"
-                  src={testimonial.image}
-                  alt={testimonial.user}
-                />
-                <div>
-                  <h6 className="text-white font-semibold">{testimonial.user}</h6>
-                  <span className="text-sm font-normal italic text-neutral-500">
-                    {testimonial.company}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
       {/* Background connecting lines */}
-      {[...Array(5)].map((_, i) => (
+      {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute w-0.5 bg-orange-500/20"
@@ -113,6 +49,49 @@ const Testimonials = () => {
           }}
         />
       ))}
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto text-center relative z-10 px-4 sm:px-6 lg:px-20">
+        <h2 className="text-4xl md:text-5xl font-bold text-white">
+          What <span className="text-orange-500">People Say</span>
+        </h2>
+        <p className="mt-4 text-lg text-neutral-400">
+          Hear from real users who experienced the wisdom of VedAI.
+        </p>
+      </div>
+
+      {/* Testimonial Cards */}
+      <div className="mt-16 grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative z-10 px-4 sm:px-6 lg:px-20">
+        {testimonials.map((testimonial, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: idx * 0.2 }}
+            className="bg-neutral-900/80 backdrop-blur-md border border-orange-800/40 rounded-2xl p-6 shadow-[0_0_40px_rgba(255,140,0,0.15)] hover:shadow-[0_0_70px_rgba(255,140,0,0.35)] hover:scale-[1.02] transition-all duration-300"
+          >
+            <div className="flex items-center gap-4">
+              <img
+                src={testimonial.image}
+                alt={testimonial.user}
+                className="w-14 h-14 rounded-full object-cover border-2 border-orange-500"
+              />
+              <div>
+                <h4 className="text-lg font-semibold text-white">
+                  {testimonial.user}
+                </h4>
+                <p className="text-sm text-neutral-400 italic">
+                  {testimonial.company}
+                </p>
+              </div>
+            </div>
+            <p className="mt-4 text-neutral-300 italic">
+              "{testimonial.text}"
+            </p>
+          </motion.div>
+        ))}
+      </div>
     </section>
   );
 };

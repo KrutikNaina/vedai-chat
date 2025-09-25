@@ -9,8 +9,10 @@ import Testimonials from "./components/Testimonials";
 import Login from "./auth/login";
 import Signup from "./auth/Signup";
 import ChatPage from "./pages/ChatPage";
-import RashiName from "./pages/RashiName"
 import About from "./pages/About";
+import AboutSection from "./components/AboutSection";
+import LiveChatPreview from "./components/LiveChatPreview";
+import VedAI404 from "./pages/VedAI404";
 
 const App = () => {
   return (
@@ -24,6 +26,8 @@ const App = () => {
             <div className="max-w-7xl mx-auto pt-20 px-6">
               <HeroSection />
               <FeatureSection />
+              <LiveChatPreview />
+              {/* <AboutSection /> */}
               <Pricing />
               <Testimonials />
               <Footer />
@@ -37,8 +41,8 @@ const App = () => {
 
         {/* All Pages */}
         <Route path="/chatpage" element={<ChatPage/>}/>
-        <Route path="/rashiname" element={<RashiName/>}/>
         <Route path="/about" element={<About/>}/>
+        <Route path="*" element={<VedAI404/>} />
 
       </Routes>
     </Router>

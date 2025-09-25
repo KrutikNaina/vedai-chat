@@ -1,65 +1,102 @@
-// auth/Signup.jsx
 import { FcGoogle } from "react-icons/fc";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { IoMdClose } from "react-icons/io";
 
-export default function Signup() {
+const Signup = () => {
+  const navigate = useNavigate();
+  const [warning, setWarning] = useState("");
+
+  const handleGoogleSignup = () => {
+    alert("Google Signup Clicked!");
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-500/10 via-neutral-900 to-orange-800/20">
-      <div className="backdrop-blur-lg bg-white/10 border border-white/20 p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        {/* Title */}
-        <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-orange-500 to-orange-800 bg-clip-text text-transparent">
-          Create an Account
-        </h2>
-        <p className="text-gray-300 text-center mt-2 mb-6">Join <span className="font-semibold text-white">VirtualR</span> today</p>
+    <section className="relative flex items-center justify-center min-h-screen bg-gradient-to-b from-black via-neutral-900 to-black text-white px-6">
+      {/* Background glow effect */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 0.4, scale: 1 }}
+        transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+        className="absolute w-[500px] h-[500px] bg-gradient-to-r from-orange-500/30 to-red-500/30 rounded-full blur-3xl"
+      />
 
-        {/* Form */}
-        <form className="space-y-4">
+      {/* Main Signup Card */}
+      <div className="relative z-10 w-full max-w-md p-8 bg-neutral-900/70 backdrop-blur-md border border-neutral-800 rounded-2xl shadow-[0_0_40px_rgba(255,140,0,0.3)]">
+        
+        {/* Close Button */}
+        <button
+          onClick={() => navigate("/")}
+          className="absolute top-4 right-4 text-white hover:text-orange-500 transition text-2xl"
+        >
+          <IoMdClose />
+        </button>
+
+        <h1 className="text-3xl font-bold text-center mb-6">
+          Join{" "}
+          <span className="bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
+            VedAI
+          </span>
+        </h1>
+        <p className="text-center text-neutral-400 mb-10">
+          Create your account to start your Vedic wisdom journey
+        </p>
+
+        {warning && (
+          <p className="mb-4 text-center text-yellow-400 font-medium">{warning}</p>
+        )}
+
+        {/* Google Signup Button */}
+        <button
+          onClick={handleGoogleSignup}
+          className="flex items-center justify-center w-full py-3 px-5 rounded-lg border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 transition shadow-lg hover:shadow-[0_0_25px_rgba(255,165,0,0.3)] mb-6"
+        >
+          <FcGoogle className="text-2xl mr-3" />
+          <span className="text-lg font-medium">Sign up with Google</span>
+        </button>
+
+        {/* Divider */}
+        <div className="flex items-center my-6">
+          <hr className="flex-grow border-neutral-700" />
+          <span className="mx-4 text-neutral-500 text-sm">OR</span>
+          <hr className="flex-grow border-neutral-700" />
+        </div>
+
+        {/* Name + Email + Password */}
+        <form className="space-y-5">
           <input
             type="text"
             placeholder="Full Name"
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:border-orange-500 focus:ring focus:ring-orange-500/40 outline-none transition"
           />
           <input
             type="email"
-            placeholder="Email Address"
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            placeholder="Email"
+            className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:border-orange-500 focus:ring focus:ring-orange-500/40 outline-none transition"
           />
           <input
             type="password"
             placeholder="Password"
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:border-orange-500 focus:ring focus:ring-orange-500/40 outline-none transition"
           />
-
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-800 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition"
+            className="w-full py-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg text-lg font-semibold text-white shadow-lg hover:shadow-[0_0_30px_rgba(255,165,0,0.5)] transition"
           >
             Sign Up
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="flex items-center my-6">
-          <hr className="flex-1 border-gray-600" />
-          <span className="px-2 text-gray-400 text-sm">OR</span>
-          <hr className="flex-1 border-gray-600" />
-        </div>
-
-        {/* Google Button */}
-        <button
-          className="flex items-center justify-center gap-2 w-full border border-white/20 bg-white/5 text-white py-3 rounded-xl hover:bg-white/10 transition"
-        >
-          <FcGoogle size={24} />
-          <span>Sign up with Google</span>
-        </button>
-
-        {/* Redirect */}
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <p className="mt-6 text-center text-neutral-500 text-sm">
           Already have an account?{" "}
-          <a href="/login" className="text-orange-400 hover:underline">
-            Log In
+          <a href="/login" className="text-orange-500 hover:underline">
+            Log in
           </a>
         </p>
       </div>
-    </div>
+    </section>
   );
-}
+};
+
+export default Signup;

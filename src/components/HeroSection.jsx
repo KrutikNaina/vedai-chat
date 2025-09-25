@@ -32,6 +32,11 @@ export default function VedAICosmicHero() {
     pulse();
   }, [glowControls]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-start overflow-hidden px-6 lg:px-20 -mt-10 lg:-mt-24">
 
@@ -144,7 +149,7 @@ export default function VedAICosmicHero() {
             whileHover={{ scale: 1.05, rotate: 1 }}
             className="mt-6 px-8 py-4 rounded-3xl bg-gradient-to-r from-orange-500 to-orange-700 text-white font-bold shadow-xl hover:shadow-2xl transition-all"
           ><Link to="/chatpage">
-            🌟 Ask VedAI
+              🌟 Ask VedAI
             </Link>
           </motion.button>
         </motion.div>

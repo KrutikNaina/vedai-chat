@@ -3,44 +3,47 @@ import { Cog, Circle, Book, Moon, Star, User } from "lucide-react";
 
 const features = [
   {
-    icon: <Cog />,
-    text: "AI-Powered Bhagavad Gita Guidance",
-    description: "Get life solutions through relevant shlokas and their meanings.",
+    title: "AI-Powered Bhagavad Gita Guidance",
+    description:
+      "Get life solutions through relevant shlokas and their meanings.",
+    icon: <Cog className="w-10 h-10 text-orange-500" />,
   },
   {
-    icon: <Circle />,
-    text: "Four Vedas Knowledge Hub",
+    title: "Four Vedas Knowledge Hub",
     description:
       "Get insights from the Rig Veda, Sama Veda, Yajur Veda, and Atharva Veda for holistic wisdom.",
+    icon: <Circle className="w-10 h-10 text-orange-500" />,
   },
   {
-    icon: <Cog />,
-    text: "Hindu Dream Interpretation",
+    title: "Hindu Dream Interpretation",
     description:
       "Understand the spiritual meaning of dreams with AI-powered insights from the Vedas.",
+    icon: <Moon className="w-10 h-10 text-orange-500" />,
   },
   {
-    icon: <Book />,
-    text: "Personalized Bhagavad Gita Learning Path",
-    description: "Step-by-step Gita study recommendations tailored to your spiritual progress.",
+    title: "Personalized Bhagavad Gita Learning Path",
+    description:
+      "Step-by-step Gita study recommendations tailored to your spiritual progress.",
+    icon: <Book className="w-10 h-10 text-orange-500" />,
   },
   {
-    icon: <Star />,
-    text: "Personalized Puja Guide",
-    description: "AI suggests step-by-step puja rituals based on family traditions.",
+    title: "Personalized Puja Guide",
+    description:
+      "AI suggests step-by-step puja rituals based on family traditions.",
+    icon: <Star className="w-10 h-10 text-orange-500" />,
   },
   {
-    icon: <User />,
-    text: "Spiritual Name Suggestion",
+    title: "Spiritual Name Suggestion",
     description:
       "AI generates Hindu baby names and spiritual names based on Nakshatra and Rashi.",
+    icon: <User className="w-10 h-10 text-orange-500" />,
   },
 ];
 
 const FeatureSection = () => {
   return (
-    <section className="relative mt-20 border-b border-neutral-800 min-h-[1000px] overflow-hidden">
-      {/* Cosmic background particles */}
+    <section className="relative w-full py-20 overflow-hidden bg-gradient-to-b ">
+      {/* Floating cosmic particles */}
       {[...Array(40)].map((_, i) => (
         <motion.div
           key={i}
@@ -54,11 +57,11 @@ const FeatureSection = () => {
           }}
           animate={{
             y: [0, 12, 0],
-            x: [0, 10, 0],
+            x: [0, 8, 0],
             opacity: [0.3, 0.8, 0.3],
           }}
           transition={{
-            duration: 4 + Math.random() * 3,
+            duration: 5 + Math.random() * 3,
             repeat: Infinity,
             ease: "easeInOut",
             delay: Math.random() * 2,
@@ -66,81 +69,14 @@ const FeatureSection = () => {
         />
       ))}
 
-      <div className="text-center relative z-10">
-        <span className="bg-neutral-900 text-orange-500 rounded-full h-6 text-sm font-medium px-3 py-1 uppercase tracking-wider">
-          Feature
-        </span>
-        <h2 className="text-3xl sm:text-5xl lg:text-6xl mt-10 lg:mt-20 tracking-wide">
-          Easily Build Your{" "}
-          <span className="bg-gradient-to-r from-orange-500 to-orange-800 text-transparent bg-clip-text">
-            AI-Powered Vedic Wisdom Journey
-          </span>
-        </h2>
-      </div>
-
-      {/* Features Grid */}
-      <div className="flex flex-wrap justify-center mt-10 lg:mt-20 relative z-10 gap-12">
-        {features.map((feature, index) => (
-          <motion.div
-            key={index}
-            whileHover={{ scale: 1.08, y: -8 }}
-            className="w-full sm:w-1/2 lg:w-1/3 px-4 relative"
-          >
-            {/* Orbiting mini-orbs */}
-            {[...Array(3)].map((_, orbIndex) => (
-              <motion.div
-                key={orbIndex}
-                className="absolute rounded-full bg-orange-400/50"
-                style={{
-                  width: 6 + Math.random() * 4,
-                  height: 6 + Math.random() * 4,
-                  top: "50%",
-                  left: "50%",
-                  translateX: "-50%",
-                  translateY: "-50%",
-                }}
-                animate={{
-                  rotate: [0, 360],
-                  x: [20 + orbIndex * 8, -20 - orbIndex * 8],
-                  y: [-20 - orbIndex * 6, 20 + orbIndex * 6],
-                }}
-                transition={{
-                  duration: 6 + orbIndex,
-                  repeat: Infinity,
-                  ease: "linear",
-                  delay: orbIndex * 0.2,
-                }}
-              />
-            ))}
-
-            {/* Feature Card */}
-            <div className="flex gap-4 p-6 bg-neutral-900/60 rounded-3xl shadow-[0_0_60px_rgba(255,140,0,0.25)] hover:shadow-[0_0_100px_rgba(255,165,0,0.45)] transition-all duration-500 relative z-10">
-              {/* Spinning glowing icon */}
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                className="flex h-14 w-14 p-3 bg-gradient-to-br from-orange-500 to-orange-700 justify-center items-center rounded-full text-white text-2xl shadow-lg"
-              >
-                {feature.icon}
-              </motion.div>
-
-              <div>
-                <h5 className="text-xl font-semibold text-white">{feature.text}</h5>
-                <p className="text-md mt-2 text-neutral-400">{feature.description}</p>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Cosmic connecting lines */}
+      {/* Background connecting lines */}
       {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-0.5 bg-orange-500/30"
+          className="absolute w-0.5 bg-orange-500/20"
           style={{
             top: `${10 + i * 15}%`,
-            left: `${15 + i * 10}%`,
+            left: `${20 + i * 12}%`,
             height: "70%",
             rotate: `${Math.random() * 20 - 10}deg`,
           }}
@@ -152,6 +88,36 @@ const FeatureSection = () => {
           }}
         />
       ))}
+
+      {/* Section Content */}
+      <div className="max-w-7xl mx-auto text-center relative z-10 px-4 sm:px-6 lg:px-20">
+        <h2 className="text-4xl md:text-5xl font-bold text-white">
+          Powerful <span className="text-orange-500">VedAI Features</span>
+        </h2>
+        <p className="mt-4 text-lg text-neutral-400">
+          Explore the blend of ancient scriptures and modern AI technology.
+        </p>
+      </div>
+
+      {/* Feature Cards */}
+      <div className="mt-16 grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative z-10 px-4 sm:px-6 lg:px-20">
+        {features.map((feature, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: idx * 0.2 }}
+            className="bg-neutral-900/80 backdrop-blur-md border border-orange-800/40 rounded-2xl p-6 shadow-[0_0_40px_rgba(255,140,0,0.15)] hover:shadow-[0_0_70px_rgba(255,140,0,0.35)] hover:scale-[1.03] transition-all duration-300 group"
+          >
+            <div className="mb-4">{feature.icon}</div>
+            <h3 className="text-xl font-semibold text-white group-hover:text-orange-400 transition">
+              {feature.title}
+            </h3>
+            <p className="mt-2 text-neutral-400">{feature.description}</p>
+          </motion.div>
+        ))}
+      </div>
     </section>
   );
 };
