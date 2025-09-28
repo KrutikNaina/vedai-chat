@@ -107,7 +107,7 @@ export default function ChatPage() {
     setTyping(true);
     setStopTyping(false);
 
-    const API_KEY = "APIKey";
+    const API_KEY = "Gemini api";
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
     try {
@@ -239,7 +239,7 @@ export default function ChatPage() {
           {Array.isArray(chatHistory) &&
             chatHistory.map((chat, i) => (
               <div key={i} onClick={() => loadChat(chat)} className="cursor-pointer bg-white/10 hover:bg-orange-500/40 p-3 rounded-lg text-sm line-clamp-2">
-                {chat.messages?.[0]?.content || "Conversation"}
+                {chat.messages?.[1]?.content || "Conversation"}
               </div>
             ))}
         </div>
@@ -262,10 +262,11 @@ export default function ChatPage() {
               ⚠️ Free chat limit reached. Next message available in: {countdown}
             </div>
           )}
+
           {messages.map((msg, idx) => {
             const isUser = msg.role === "user";
 
-            // Split assistant message for readability
+            // Always split assistant response into 📜, 🔤, 💬 sections
             let parts = [];
             if (!isUser) {
               const regex = /(📜|🔤|💬)/g;
@@ -273,7 +274,11 @@ export default function ChatPage() {
               for (let i = 0; i < splitContent.length; i += 2) {
                 const marker = splitContent[i];
                 const text = splitContent[i + 1] || "";
-                parts.push({ marker, text });
+                const paragraphs = text
+                  .split(/\n\n|\r\n\r\n/)
+                  .map((p) => p.trim())
+                  .filter(Boolean);
+                parts.push({ marker, paragraphs });
               }
             }
 
@@ -282,37 +287,65 @@ export default function ChatPage() {
                 key={idx}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                transition={{ duration: 0.3 }}
+                className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}
               >
                 <div
-                  className={`max-w-[75%] px-5 py-4 text-sm md:text-base rounded-2xl shadow-lg ${
-                    isUser
-                      ? "bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-br-none"
-                      : "bg-white/10 border border-white/20 text-gray-200 rounded-bl-none backdrop-blur-md"
-                  }`}
+                  className={`max-w-[75%] px-5 py-4 rounded-2xl shadow-lg ${isUser
+                    ? "bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-br-none"
+                    : "bg-transparent"
+                    }`}
                 >
-                  {isUser
-                    ? msg.content
-                    : parts.map((p, i) => (
-                        <div key={i} className="mb-2">
-                          <span
-                            className={`font-bold ${
-                              p.marker === "📜"
-                                ? "text-orange-400"
+                  {!isUser ? (
+                    <div className="space-y-3">
+                      {parts.length > 0 ? (
+                        parts.map((p, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.2, duration: 0.4 }}
+                            className={`p-3 rounded-md shadow-md ${p.marker === "📜"
+                                ? "bg-[#3b1d15] text-orange-200"
                                 : p.marker === "🔤"
-                                ? "text-yellow-300"
-                                : "text-gray-200"
-                            }`}
+                                  ? "bg-[#3a3215] text-yellow-100"
+                                  : "bg-[#1e1e1e] text-gray-200"
+                              }`}
                           >
-                            {p.marker}
-                          </span>{" "}
-                          <span className="whitespace-pre-line">{p.text}</span>
+                            <span className="font-semibold text-base">{p.marker}</span>
+                            {p.paragraphs.map((para, j) => (
+                              <motion.p
+                                key={j}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: j * 0.1 }}
+                                className="mt-1 whitespace-pre-line leading-relaxed"
+                              >
+                                {para}
+                              </motion.p>
+                            ))}
+                          </motion.div>
+                        ))
+                      ) : (
+                        // fallback: if no 📜🔤💬 found (like first greeting), wrap in 💬 card
+                        <div className="p-3 rounded-md shadow-md bg-[#1e1e1e] text-gray-200">
+                          <span className="font-semibold text-base">💬</span>
+                          <p className="mt-1 whitespace-pre-line leading-relaxed">
+                            {msg.content}
+                          </p>
                         </div>
-                      ))}
+                      )}
+                    </div>
+                  ) : (
+                    msg.content
+                  )}
+
                 </div>
               </motion.div>
             );
           })}
+
+
           {typing && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
               <div className="bg-white/10 border border-white/20 text-gray-200 px-5 py-3 rounded-2xl rounded-bl-none backdrop-blur-md flex items-center gap-2">

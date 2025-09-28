@@ -13,6 +13,8 @@ import About from "./pages/About";
 import AboutSection from "./components/AboutSection";
 import LiveChatPreview from "./components/LiveChatPreview";
 import VedAI404 from "./pages/VedAI404";
+import AdminDashboard from "./admin-dashboard/AdminDashboard";
+import UserDashboard from "./user-dashboard/pages/UserDashboard";
 
 const App = () => {
   return (
@@ -43,6 +45,12 @@ const App = () => {
         <Route path="/chatpage" element={<ChatPage/>}/>
         <Route path="/about" element={<About/>}/>
         <Route path="*" element={<VedAI404/>} />
+        
+        {/* Admin Dasboard */}
+        <Route path="/admin" element={<AdminDashboard />}/>
+
+        {/* User Dashboard */}
+        <Route path="/user" element={<UserDashboard />}/>
 
       </Routes>
     </Router>

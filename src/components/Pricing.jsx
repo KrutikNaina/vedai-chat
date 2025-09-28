@@ -1,3 +1,5 @@
+// vedai-landing\src\components\Pricing.jsx
+
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { CheckCircle2, X } from "lucide-react";
