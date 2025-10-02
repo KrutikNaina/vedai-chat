@@ -15,6 +15,7 @@ import LiveChatPreview from "./components/LiveChatPreview";
 import VedAI404 from "./pages/VedAI404";
 import AdminDashboard from "./admin-dashboard/AdminDashboard";
 import UserDashboard from "./user-dashboard/pages/UserDashboard";
+import SEO from "./components/SEO";
 
 const App = () => {
   return (
