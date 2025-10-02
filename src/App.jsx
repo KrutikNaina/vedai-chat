@@ -25,32 +25,41 @@ const App = () => {
         <Route
           path="/"
           element={
-            <div className="max-w-7xl mx-auto pt-20 px-6">
-              <HeroSection />
-              <FeatureSection />
-              <LiveChatPreview />
-              {/* <AboutSection /> */}
-              <Pricing />
-              <Testimonials />
-              <Footer />
-            </div>
+            <>
+              <SEO
+                title="VedAI — AI-Powered Spiritual Guidance from the Bhagavad Gita & Vedas"
+                description="VedAI is a cosmic AI portal offering insights from the Bhagavad Gita, Vedas, shlokas, dream interpretations, puja rituals, and spiritual names."
+                keywords="VedAI, AI Bhagavad Gita, AI spiritual chatbot, Vedic wisdom AI, Hindu dream interpretation, AI puja guide, spiritual names AI"
+                url="https://vedai-chat.vercel.app/"
+                image="/vedai-preview.png"
+              />
+              <div className="max-w-7xl mx-auto pt-20 px-6">
+                <HeroSection />
+                <FeatureSection />
+                <LiveChatPreview />
+                <Pricing />
+                <Testimonials />
+                <Footer />
+              </div>
+            </>
           }
         />
+
 
         {/* Auth Pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
         {/* All Pages */}
-        <Route path="/chatpage" element={<ChatPage/>}/>
-        <Route path="/about" element={<About/>}/>
-        <Route path="*" element={<VedAI404/>} />
-        
+        <Route path="/chatpage" element={<ChatPage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="*" element={<VedAI404 />} />
+
         {/* Admin Dasboard */}
-        <Route path="/admin" element={<AdminDashboard />}/>
+        <Route path="/admin" element={<AdminDashboard />} />
 
         {/* User Dashboard */}
-        <Route path="/user" element={<UserDashboard />}/>
+        <Route path="/user" element={<UserDashboard />} />
 
       </Routes>
     </Router>
