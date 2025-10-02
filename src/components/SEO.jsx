@@ -6,6 +6,10 @@ const SEO = ({ title, description, keywords, url, image }) => {
       <title>{title}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
+      <meta
+        name="google-site-verification"
+        content={import.meta.env.VITE_GSC_KEY}
+      />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:type" content="website" />
