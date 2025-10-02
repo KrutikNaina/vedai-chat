@@ -20,7 +20,7 @@ const SEO = ({ title, description, keywords, url, image }) => {
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
 
-      {/* Google Search Console verification */}
+      {/* Google Search Add Console verification */}
       <meta
         name="google-site-verification"
         content="v4HAo6qLysy3J6jnJvDOn81xHBqZTZpoxs2ssYGMCRg"
