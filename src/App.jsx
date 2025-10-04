@@ -16,6 +16,10 @@ import VedAI404 from "./pages/VedAI404";
 import AdminDashboard from "./admin-dashboard/AdminDashboard";
 import UserDashboard from "./user-dashboard/pages/UserDashboard";
 import SEO from "./components/SEO";
+import KathaIntro from "./pages/E-Katha/KathaIntro";
+import KathaSelection from "./pages/E-Katha/KathaSelection";
+import KathaCompletion from "./pages/E-Katha/KathaCompletion";
+import EKathaFlow from "./pages/E-Katha/EKathaFlow";
 
 const App = () => {
   return (
@@ -54,6 +58,10 @@ const App = () => {
         {/* All Pages */}
         <Route path="/chatpage" element={<ChatPage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/ekatha" element={<EKathaFlow/>} />
+        
+
+        {/* Eror 404 page */}
         <Route path="*" element={<VedAI404 />} />
 
         {/* Admin Dasboard */}
