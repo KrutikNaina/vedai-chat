@@ -1,78 +1,143 @@
+// vedai-landing/src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
+
+/* Common */
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import SEO from "./components/SEO";
+
+/* Home */
 import HeroSection from "./components/HeroSection";
 import FeatureSection from "./components/FeatureSection";
-import Workflow from "./components/Workflow";
-import Footer from "./components/Footer";
-import Pricing from "./components/Pricing";
+import LiveChatPreview from "./components/LiveChatPreview";
 import Testimonials from "./components/Testimonials";
+
+/* Auth */
 import Login from "./auth/login";
 import Signup from "./auth/Signup";
+
+/* Pages */
 import ChatPage from "./pages/ChatPage";
 import About from "./pages/About";
-import AboutSection from "./components/AboutSection";
-import LiveChatPreview from "./components/LiveChatPreview";
 import VedAI404 from "./pages/VedAI404";
-import AdminDashboard from "./admin-dashboard/AdminDashboard";
+
+/* User Dashboard */
 import UserDashboard from "./user-dashboard/pages/UserDashboard";
-import SEO from "./components/SEO";
-import KathaIntro from "./pages/E-Katha/KathaIntro";
-import KathaSelection from "./pages/E-Katha/KathaSelection";
-import KathaCompletion from "./pages/E-Katha/KathaCompletion";
-import EKathaFlow from "./pages/E-Katha/EKathaFlow";
+
+/* Blog (User Side) */
+import BlogList from "./pages/BlogList";
+import BlogDetail from "./pages/BlogDetail";
+
+/* E-Katha */
+import EKathaFlow from "./E-Katha/EKathaFlow";
+
+/* Admin */
+import AdminLayout from "./admin/AdminLayout";
+import AdminGuard from "./admin/AdminGuard";
+import Dashboard from "./admin/Dashboard";
+
+/* Admin – Users */
+import Users from "./admin/Users";
+import UserDetail from "./admin/UserDetail";
+
+/* Admin – eKatha */
+import KathaList from "./admin/Katha/KathaList";
+import AddKatha from "./admin/Katha/AddKatha";
+import EditKatha from "./admin/Katha/EditKatha";
+import ViewKatha from "./admin/Katha/ViewKatha";
+
+/* Admin – API */
+import ApiLogs from "./admin/ApiLogs";
+
+/* Admin – Blog */
+import AdminBlogList from "./admin/Blog/BlogList";
+import AddBlog from "./admin/Blog/AddBlog";
+import EditBlog from "./admin/Blog/EditBlog";
 
 const App = () => {
   return (
-    <Router>
-      <Navbar />
-      <Routes>
-        {/* Homepage */}
-        <Route
-          path="/"
-          element={
-            <>
-              <SEO
-                title="VedAI — AI-Powered Spiritual Guidance from the Bhagavad Gita & Vedas"
-                description="VedAI is a cosmic AI portal offering insights from the Bhagavad Gita, Vedas, shlokas, dream interpretations, puja rituals, and spiritual names."
-                keywords="VedAI, AI Bhagavad Gita, AI spiritual chatbot, Vedic wisdom AI, Hindu dream interpretation, AI puja guide, spiritual names AI"
-                url="https://vedai-chat.vercel.app/"
-                image="/vedai-preview.png"
-              />
-              <div className="max-w-7xl mx-auto pt-20 px-6">
-                <HeroSection />
-                <FeatureSection />
-                <LiveChatPreview />
-                <Pricing />
-                <Testimonials />
-                <Footer />
-              </div>
-            </>
-          }
-        />
+    <HelmetProvider>
+      <Router>
+        <Navbar />
 
+        <Routes>
+          {/* ================= HOME ================= */}
+          <Route
+            path="/"
+            element={
+              <>
+                <SEO
+                  title="VedAI — AI-Powered Spiritual Guidance from Bhagavad Gita & Vedas"
+                  description="VedAI offers AI-driven wisdom from the Bhagavad Gita, Vedas, Ekatha rituals, astrology insights, and spiritual guidance."
+                  keywords="VedAI, AI Bhagavad Gita, Vedic AI, Hindu spiritual chatbot, Ekatha rituals"
+                  url="https://vedai-chat.vercel.app/"
+                  image="/vedai-preview.png"
+                />
 
-        {/* Auth Pages */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+                <div className="max-w-7xl mx-auto pt-20 px-6">
+                  <HeroSection />
+                  <FeatureSection />
+                  <LiveChatPreview />
+                  <Testimonials />
+                  <Footer />
+                </div>
+              </>
+            }
+          />
 
-        {/* All Pages */}
-        <Route path="/chatpage" element={<ChatPage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/ekatha" element={<EKathaFlow/>} />
-        
+          {/* ================= AUTH ================= */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
-        {/* Eror 404 page */}
-        <Route path="*" element={<VedAI404 />} />
+          {/* ================= USER PAGES ================= */}
+          <Route path="/chatpage" element={<ChatPage />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/user" element={<UserDashboard />} />
 
-        {/* Admin Dasboard */}
-        <Route path="/admin" element={<AdminDashboard />} />
+          {/* ================= BLOG (USER) ================= */}
+          <Route path="/blog" element={<BlogList />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} />
 
-        {/* User Dashboard */}
-        <Route path="/user" element={<UserDashboard />} />
+          {/* ================= E-KATHA ================= */}
+          <Route path="/ekatha" element={<EKathaFlow />} />
 
-      </Routes>
-    </Router>
-    
+          {/* ================= ADMIN ================= */}
+          <Route
+            path="/admin"
+            element={
+              <AdminGuard>
+                <AdminLayout />
+              </AdminGuard>
+            }
+          >
+            {/* Dashboard */}
+            <Route index element={<Dashboard />} />
+
+            {/* Users */}
+            <Route path="users" element={<Users />} />
+            <Route path="users/:id" element={<UserDetail />} />
+
+            {/* eKatha */}
+            <Route path="katha" element={<KathaList />} />
+            <Route path="katha/add" element={<AddKatha />} />
+            <Route path="katha/edit/:id" element={<EditKatha />} />
+            <Route path="katha/view/:id" element={<ViewKatha />} />
+
+            {/* Blog (Admin) */}
+            <Route path="blog" element={<AdminBlogList />} />
+            <Route path="blog/add" element={<AddBlog />} />
+            <Route path="blog/edit/:id" element={<EditBlog />} />
+
+            {/* API Logs */}
+            <Route path="api-logs" element={<ApiLogs />} />
+          </Route>
+
+          {/* ================= 404 ================= */}
+          <Route path="*" element={<VedAI404 />} />
+        </Routes>
+      </Router>
+    </HelmetProvider>
   );
 };
 

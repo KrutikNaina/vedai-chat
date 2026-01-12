@@ -20,7 +20,6 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Fetch logged-in user info
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -41,17 +40,15 @@ const Navbar = () => {
         } else {
           setUser(null);
         }
-      } catch (err) {
+      } catch {
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
-
     fetchUser();
   }, []);
 
-  // Hide navbar on specific pages
   const hideNavbarPaths = ["/login", "/signup"];
   if (hideNavbarPaths.includes(location.pathname)) return null;
 
@@ -64,25 +61,27 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const getInitial = (nameOrEmail) =>
+    nameOrEmail ? nameOrEmail.charAt(0).toUpperCase() : "U";
+
   return (
     <nav className="sticky top-0 z-50 py-3 backdrop-blur-lg border-b border-neutral-700/80">
       <div className="container px-4 mx-auto relative lg:text-sm">
         <div className="flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center flex-shrink-0">
-            <Link to="/">
-              <img
-                className="h-24 -mt-6 -mb-6 mr-2 cursor-pointer hover:scale-105 hover:drop-shadow-[0_0_5px_#ff6a00]"
-                src={logo}
-                alt="Logo"
-              />
-            </Link>
-          </div>
 
-          {/* Desktop nav links */}
+          {/* LOGO */}
+          <Link to="/">
+            <img
+              className="h-24 -mt-6 -mb-6 cursor-pointer hover:scale-105 hover:drop-shadow-[0_0_5px_#ff6a00]"
+              src={logo}
+              alt="Logo"
+            />
+          </Link>
+
+          {/* DESKTOP NAV */}
           <ul className="hidden lg:flex ml-14 space-x-8">
-            {navItems.map((item, index) => (
-              <li key={index}>
+            {navItems.map((item) => (
+              <li key={item.label}>
                 <Link to={item.href} className="hover:text-orange-500 transition">
                   {item.label}
                 </Link>
@@ -90,116 +89,146 @@ const Navbar = () => {
             ))}
           </ul>
 
-          {/* Desktop auth buttons */}
-          <div className="hidden lg:flex justify-center space-x-4 items-center relative">
-            {!loading && (
-              !user ? (
-                <>
-                  <Link
-                    to="/login"
-                    className="py-2 px-3 border rounded-md hover:border-orange-500"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="py-2 px-3 border rounded-md bg-gradient-to-r from-orange-500 to-orange-800 text-white hover:from-orange-600 hover:to-orange-900 transition"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              ) : (
-                <div className="relative">
-                  <button
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="py-2 px-3 border rounded-md bg-orange-600 text-white hover:bg-orange-700 transition"
-                  >
+          {/* AUTH / PROFILE SECTION */}
+          <div className="hidden lg:flex items-center space-x-4 relative">
+
+            {!loading && !user && (
+              <>
+                <Link to="/login" className="py-2 px-3 border rounded-md">
+                  Login
+                </Link>
+                {/* <Link
+                  to="/signup"
+                  className="py-2 px-3 rounded-md bg-gradient-to-r from-orange-500 to-orange-800 text-white"
+                >
+                  Sign Up
+                </Link> */}
+              </>
+            )}
+
+            {!loading && user && (
+              <div className="relative">
+                {/* Avatar + Welcome Name */}
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-neutral-800 transition"
+                >
+
+                  {/* Welcome Message */}
+                  <span className="flex items-center gap-2 text-white font-medium">
                     Welcome, {user.displayName || user.email}
-                  </button>
-                  {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-32 bg-neutral-900 border border-neutral-700 rounded-md shadow-lg z-50">
-                      <button
-                        onClick={handleLogout}
-                        className="w-full py-2 px-3 text-left text-white hover:bg-red-600 rounded-md transition"
+
+                    {user.isAdmin && (
+                      <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-black shadow-md">
+                        ADMIN
+                      </span>
+                    )}
+                  </span>
+
+                  {/* Avatar Circle */}
+                  <div className="w-10 h-10 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold">
+                    {getInitial(user.displayName || user.email)}
+                  </div>
+
+                </button>
+
+                {/* DROPDOWN */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-3 w-56 bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl p-2">
+
+                    <Link
+                      to="/user"
+                      onClick={() => setDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-md hover:bg-neutral-800"
+                    >
+                      Profile Dashboard
+                    </Link>
+
+                    {user.isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setDropdownOpen(false)}
+                        className="block px-3 py-2 rounded-md hover:bg-neutral-800"
                       >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
+                        Admin Panel
+                      </Link>
+                    )}
+
+                    <button
+                      onClick={() => alert("Settings Coming Soon")}
+                      className="w-full text-left px-3 py-2 rounded-md hover:bg-neutral-800"
+                    >
+                      Settings
+                    </button>
+
+                    <hr className="my-2 border-neutral-700" />
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-3 py-2 text-red-400 hover:bg-red-600/30 rounded-md"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+
+              </div>
             )}
           </div>
 
-          {/* Mobile toggle */}
-          <div className="lg:hidden flex items-center">
-            <button onClick={toggleNavbar}>
-              {mobileDrawerOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
+          {/* MOBILE MENU BUTTON */}
+          <button className="lg:hidden" onClick={toggleNavbar}>
+            {mobileDrawerOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
         </div>
 
-        {/* Mobile Drawer */}
+        {/* MOBILE DRAWER */}
         {mobileDrawerOpen && (
-          <div className="fixed top-0 right-0 z-20 bg-neutral-900 w-full h-screen p-12 flex flex-col justify-center items-center lg:hidden">
+          <div className="fixed top-0 right-0 w-full h-screen bg-neutral-900 p-12 flex flex-col items-center space-y-8">
             <ul className="space-y-6 text-2xl">
-              {navItems.map((item, index) => (
-                <li key={index}>
-                  <Link
-                    to={item.href}
-                    onClick={() => setMobileDrawerOpen(false)}
-                  >
+              {navItems.map((item) => (
+                <li key={item.label}>
+                  <Link to={item.href} onClick={() => setMobileDrawerOpen(false)}>
                     {item.label}
                   </Link>
                 </li>
               ))}
             </ul>
-            <div className="flex flex-col space-y-4 mt-10 w-full items-center">
-              {!loading && (
-                !user ? (
-                  <>
-                    <Link
-                      to="/login"
-                      onClick={() => setMobileDrawerOpen(false)}
-                      className="w-3/4 text-center py-3 border rounded-md hover:border-orange-500"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/signup"
-                      onClick={() => setMobileDrawerOpen(false)}
-                      className="w-3/4 text-center py-3 rounded-md bg-gradient-to-r from-orange-500 to-orange-800 hover:from-orange-600 hover:to-orange-900 transition"
-                    >
-                      Sign Up
-                    </Link>
-                  </>
-                ) : (
-                  <div className="relative w-3/4">
-                    <button
-                      onClick={() => setDropdownOpen(!dropdownOpen)}
-                      className="w-full py-3 rounded-md bg-orange-600 text-white hover:bg-orange-700 transition"
-                    >
-                      Welcome, {user.displayName || user.email}
-                    </button>
-                    {dropdownOpen && (
-                      <div className="mt-2 w-full bg-neutral-900 border border-neutral-700 rounded-md shadow-lg z-50">
-                        <button
-                          onClick={() => {
-                            handleLogout();
-                            setMobileDrawerOpen(false);
-                          }}
-                          className="w-full py-2 px-3 text-left text-white hover:bg-red-600 rounded-md transition"
-                        >
-                          Logout
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )
-              )}
-            </div>
+
+            {!loading && user && (
+              <div className="mt-8 text-center">
+                <div className="w-14 h-14 rounded-full bg-orange-600 text-white flex items-center justify-center text-xl font-bold mx-auto">
+                  {getInitial(user.displayName || user.email)}
+                </div>
+
+                <p className="text-white mt-2">Welcome, {user.displayName || user.email}</p>
+
+                <button
+                  onClick={handleLogout}
+                  className="mt-4 w-40 py-2 bg-red-600 rounded-md text-white"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+
+            {!loading && !user && (
+              <>
+                <Link to="/login" className="w-40 py-3 border rounded-md text-center">
+                  Login
+                </Link>
+                {/* <Link
+                  to="/signup"
+                  className="w-40 py-3 rounded-md bg-gradient-to-r from-orange-500 to-orange-800 text-center"
+                >
+                  Sign Up
+                </Link> */}
+              </>
+            )}
           </div>
         )}
+
       </div>
     </nav>
   );

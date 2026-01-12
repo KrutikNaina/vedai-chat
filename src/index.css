@@ -23,3 +23,51 @@
 .animate-fade-in-up {
   animation: fade-in-up 1s ease-out;
 }
+
+
+/* admin inputs */
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: #0f0f0f;
+  border: 1px solid #262626;
+  color: white;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #f97316;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  color: #a3a3a3;
+}
+
+
+.icon-btn {
+  padding: 8px;
+  border-radius: 999px;
+  color: white;
+  transition: all 0.2s ease;
+}
+.icon-btn:hover {
+  transform: scale(1.1);
+}
+
+
+.editor-btn {
+  background: #1f1f1f;
+  border: 1px solid #333;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #ddd;
+}
+.editor-btn:hover {
+  background: #ff6a00;
+  color: black;
+}

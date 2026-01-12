@@ -1,15 +1,14 @@
+// vedai-landing\src\pages\ChatPage.jsx
 import { useState, useEffect, useRef } from "react";
 import { Send, Menu, X, History, Plus, ChevronsLeft, ChevronsRight, Crown } from "lucide-react";
 import { motion } from "framer-motion";
-import ReactMarkdown from "react-markdown";
 import { useNavigate } from "react-router-dom";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content:
-        "🙏 Namaste! I am VedAI, your AI Guru. Ask me anything and I'll guide you with wisdom from the Bhagavad Gita.",
+      content: "🙏 Namaste! I am VedAI, your AI Guru. Ask me anything and I'll guide you with wisdom from the Bhagavad Gita.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -31,7 +30,7 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const chatEndRef = useRef(null);
 
-  // ===== Authenticate user =====
+  // Authenticate user
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -41,10 +40,9 @@ export default function ChatPage() {
     }
   }, [navigate]);
 
-  // ===== Fetch user data and subscription status =====
+  // Fetch user data and subscription status
   const fetchUserData = async (token) => {
     try {
-      // Get user profile
       const userRes = await fetch("http://localhost:5000/auth/user", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -53,7 +51,6 @@ export default function ChatPage() {
         const userData = await userRes.json();
         setUserRole(userData.role || "free");
 
-        // Get subscription details
         const subRes = await fetch("http://localhost:5000/api/payment/subscription", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -78,7 +75,7 @@ export default function ChatPage() {
     }
   };
 
-  // ===== Fetch chat history and user count =====
+  // Fetch chat history and user count
   const fetchHistory = async (token = null) => {
     const authToken = token || localStorage.getItem("token");
     if (!authToken) return;
@@ -90,7 +87,6 @@ export default function ChatPage() {
         const data = await res.json();
         setChatHistory(Array.isArray(data.chats) ? data.chats : []);
 
-        // Remaining chats (if backend sends)
         if (data.remainingChats !== undefined) {
           const remaining = data.remainingChats;
           setChatCount(remaining === "unlimited" ? 0 : FREE_CHAT_LIMIT - remaining);
@@ -105,7 +101,7 @@ export default function ChatPage() {
     }
   };
 
-  // ===== Save chat =====
+  // Save chat
   const saveChatToDB = async (allMessages) => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -124,11 +120,10 @@ export default function ChatPage() {
     }
   };
 
-  // ===== Send message =====
+  // Send message
   const sendMessage = async (msg = null) => {
     if (limitReached && userRole === "free") return;
 
-    // Ensure it's always string
     const userMessage = (msg || input || "").toString().trim();
     if (!userMessage) return;
 
@@ -139,31 +134,27 @@ export default function ChatPage() {
     setStopTyping(false);
 
     try {
-      const API_KEY = "AIzaSyBy_V3isORfHKus4Rg-jinxIFzNXyWgBa0";// Replace with real key
-      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+      const token = localStorage.getItem("token");
 
-      const res = await fetch(API_URL, {
+      const res = await fetch("http://localhost:5000/api/chat/ask", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: {
-            role: "system",
-            parts: [
-              { text: "Respond using Bhagavad Gita Shloka, Transliteration, and Meaning..." },
-            ],
-          },
-          contents: [{ role: "user", parts: [{ text: userMessage }] }],
-        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message: userMessage }),
       });
 
       const data = await res.json();
+
       const botReply =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+        data?.reply ||
         "🙏 VedAI is unavailable. Please try again later.";
 
-      // Typing effect
+      // typing effect (UNCHANGED)
       let currentText = "";
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
       for (let i = 0; i < botReply.length; i++) {
         if (stopTyping) break;
         await new Promise((r) => setTimeout(r, 20));
@@ -175,7 +166,10 @@ export default function ChatPage() {
         });
       }
 
-      await saveChatToDB([...updatedMessages, { role: "assistant", content: botReply }]);
+      await saveChatToDB([
+        ...updatedMessages,
+        { role: "assistant", content: botReply },
+      ]);
 
       if (userRole === "free") {
         setChatCount((prev) => prev + 1);
@@ -195,9 +189,9 @@ export default function ChatPage() {
     }
   };
 
-  // ===== Countdown for next allowed message =====
+  // Countdown for next allowed message
   const startCountdown = () => {
-    const endTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24h
+    const endTime = new Date().getTime() + 24 * 60 * 60 * 1000;
     const interval = setInterval(() => {
       const now = new Date().getTime();
       const distance = endTime - now;
@@ -215,13 +209,13 @@ export default function ChatPage() {
     }, 1000);
   };
 
-  // ===== Load chat from history =====
+  // Load chat from history
   const loadChat = (chat) => {
     setMessages(chat.messages || []);
     if (window.innerWidth < 768) setSidebarOpen(false);
   };
 
-  // ===== Payment Integration =====
+  // Payment Integration
   const handleUpgradeClick = () => {
     setShowPaymentModal(true);
   };
@@ -232,14 +226,13 @@ export default function ChatPage() {
     setLimitReached(false);
     setChatCount(0);
 
-    // Refresh user data
     const token = localStorage.getItem("token");
     if (token) {
       fetchUserData(token);
     }
   };
 
-  // ===== Razorpay Payment Handler =====
+  // Razorpay Payment Handler
   const initiatePayment = async (plan) => {
     try {
       const token = localStorage.getItem("token");
@@ -248,14 +241,12 @@ export default function ChatPage() {
         return;
       }
 
-      // Load Razorpay script
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
         alert("Payment system is loading, please try again.");
         return;
       }
 
-      // Create order
       const orderResponse = await fetch("http://localhost:5000/api/payment/create-order", {
         method: "POST",
         headers: {
@@ -271,7 +262,6 @@ export default function ChatPage() {
         throw new Error(orderData.message);
       }
 
-      // Razorpay options
       const options = {
         key: orderData.key,
         amount: orderData.order.amount,
@@ -281,7 +271,6 @@ export default function ChatPage() {
         order_id: orderData.order.id,
         handler: async function (response) {
           try {
-            // Verify payment
             const verifyResponse = await fetch("http://localhost:5000/api/payment/verify-payment", {
               method: "POST",
               headers: {
@@ -309,8 +298,8 @@ export default function ChatPage() {
           }
         },
         prefill: {
-          name: "User", // You can get this from user context
-          email: "user@example.com", // You can get this from user context
+          name: "User",
+          email: "user@example.com",
         },
         theme: {
           color: "#f97316"
@@ -340,12 +329,11 @@ export default function ChatPage() {
     });
   };
 
-  // ===== Helpers =====
+  // Helpers
   const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  const deleteChats = () => setMessages([]);
   const newChat = () => setMessages([]);
 
-  // ===== Auto-scroll =====
+  // Auto-scroll
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -353,11 +341,11 @@ export default function ChatPage() {
   if (loading) return <div className="text-white p-6">Loading...</div>;
 
   return (
-    <div className={`min-h-screen flex ${theme === "dark" ? "bg-black text-white" : "bg-white text-black"}`}>
+    <div className={`min-h-screen flex ${theme === "dark" ? "bg-[#0f0f0f] text-white" : "bg-gray-50 text-gray-900"}`}>
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} fixed md:static top-0 left-0 h-full ${sidebarMini ? "w-20" : "w-64"} bg-black/90 backdrop-blur-lg border-r border-white/10 transition-all duration-300 z-50`}>
+      <div className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} fixed md:static top-0 left-0 h-full ${sidebarMini ? "w-20" : "w-64"} bg-[#1a1a1a] border-r border-gray-800 transition-all duration-300 z-50`}>
         {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b border-white/20">
+        <div className="flex justify-between items-center p-4 border-b border-gray-800">
           {!sidebarMini && (
             <h2 className="text-lg font-bold flex items-center gap-2">
               <History size={18} /> History
@@ -374,7 +362,7 @@ export default function ChatPage() {
         </div>
 
         {/* New Chat */}
-        <div className="p-4 border-b border-white/20">
+        <div className="p-4 border-b border-gray-800">
           <button onClick={newChat} className="flex items-center gap-2 bg-orange-500/20 hover:bg-orange-500/40 px-3 py-2 rounded-md w-full text-sm">
             <Plus size={16} /> {!sidebarMini && "New Chat"}
           </button>
@@ -397,7 +385,7 @@ export default function ChatPage() {
       {/* Main Chat Area */}
       <div className="flex-1 relative flex flex-col">
         {/* Top bar (mobile) */}
-        <div className="flex items-center justify-between px-4 py-3 bg-black/40 border-b border-white/10 md:hidden">
+        <div className="flex items-center justify-between px-4 py-3 bg-[#1a1a1a] border-b border-gray-800 md:hidden">
           <button onClick={() => setSidebarOpen(true)}>
             <Menu size={22} />
           </button>
@@ -414,165 +402,299 @@ export default function ChatPage() {
         </div>
 
         {/* Desktop Upgrade Button */}
-        <div className="hidden md:flex items-center justify-between px-6 py-3 bg-black/40 border-b border-white/10">
-          <h1 className="text-xl font-bold">VedAI</h1>
+        <div className="hidden md:flex items-center justify-between px-6 py-4 bg-[#1a1a1a] border-b border-gray-800">
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
+              <span className="text-white font-bold">V</span>
+            </div>
+            VedAI
+          </h1>
           {userRole === "free" && (
             <button
               onClick={handleUpgradeClick}
-              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 px-4 py-2 rounded-lg text-sm font-semibold hover:shadow-lg transition-all"
+              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
             >
               <Crown size={16} />
               Upgrade to Premium
             </button>
           )}
           {userRole === "premium" && (
-            <span className="flex items-center gap-2 bg-green-600 px-3 py-1 rounded-full text-sm">
+            <span className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-700 px-4 py-2 rounded-full text-sm">
               <Crown size={14} />
               Premium User
             </span>
           )}
         </div>
 
-        {/* Chat messages */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6">
+        {/* Chat messages container */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          {/* Limit reached warning */}
           {limitReached && userRole === "free" && (
-            <div className="text-yellow-400 text-center mb-2 p-4 bg-yellow-900/20 rounded-lg">
-              ⚠️ Free chat limit reached.
-              <button
-                onClick={handleUpgradeClick}
-                className="ml-2 underline font-semibold hover:text-yellow-200"
-              >
-                Upgrade to Premium for unlimited access
-              </button>
-              {countdown && ` • Next message in: ${countdown}`}
-            </div>
-          )}
-
-{/* Messages rendering */}
-{/* Chat messages */}
-<div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6">
-  {limitReached && (
-    <div className="text-yellow-400 text-center mb-2">
-      ⚠️ Free chat limit reached. Next message available in: {countdown}
-    </div>
-  )}
-
-  {messages.map((msg, idx) => {
-    const isUser = msg.role === "user";
-
-    // Always split assistant response into 📜, 🔤, 💬 sections
-    let parts = [];
-    if (!isUser) {
-      const regex = /(📜|🔤|💬)/g;
-      const splitContent = msg.content.split(regex).filter(Boolean);
-      for (let i = 0; i < splitContent.length; i += 2) {
-        const marker = splitContent[i];
-        const text = splitContent[i + 1] || "";
-        const paragraphs = text
-          .split(/\n\n|\r\n\r\n/)
-          .map((p) => p.trim())
-          .filter(Boolean);
-        parts.push({ marker, paragraphs });
-      }
-    }
-
-    return (
-      <motion.div
-        key={idx}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}
-      >
-        <div
-          className={`max-w-[75%] px-5 py-4 rounded-2xl shadow-lg ${
-            isUser
-              ? "bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-br-none"
-              : "bg-transparent"
-          }`}
-        >
-          {isUser ? (
-            msg.content
-          ) : (
-            <div className="space-y-3">
-              {parts.map((p, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.2, duration: 0.4 }}
-                  className={`p-3 rounded-md shadow-md ${
-                    p.marker === "📜"
-                      ? "bg-[#3b1d15] text-orange-200"
-                      : p.marker === "🔤"
-                      ? "bg-[#3a3215] text-yellow-100"
-                      : "bg-[#1e1e1e] text-gray-200"
-                  }`}
-                >
-                  <span className="font-semibold text-base">{p.marker}</span>
-                  {p.paragraphs.map((para, j) => (
-                    <motion.p
-                      key={j}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: j * 0.1 }}
-                      className="mt-1 whitespace-pre-line leading-relaxed"
-                    >
-                      {para}
-                    </motion.p>
-                  ))}
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
-      </motion.div>
-    );
-  })}
-</div>
-
-          
-          {typing && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-              <div className="bg-white/10 border border-white/20 text-gray-200 px-5 py-3 rounded-2xl rounded-bl-none backdrop-blur-md flex items-center gap-2">
-                <span className="animate-bounce">●</span>
-                <span className="animate-bounce delay-200">●</span>
-                <span className="animate-bounce delay-400">●</span>
-                <button onClick={() => setStopTyping(true)} className="ml-2 text-sm">
-                  Stop
-                </button>
+            <div className="mx-auto max-w-3xl mb-4">
+              <div className="bg-gradient-to-r from-amber-900/20 to-amber-800/10 border border-amber-700/30 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-amber-500">⚠️</div>
+                  <div className="flex-1">
+                    <p className="text-amber-300 font-medium">Free chat limit reached</p>
+                    <p className="text-amber-400/80 text-sm mt-1">
+                      Upgrade to Premium for unlimited access
+                      {countdown && ` • Next message in ${countdown}`}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleUpgradeClick}
+                    className="px-3 py-1 bg-amber-600 hover:bg-amber-700 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Upgrade
+                  </button>
+                </div>
               </div>
-            </motion.div>
+            </div>
           )}
+
+          {/* Messages */}
+          <div className="mx-auto max-w-3xl space-y-6">
+            {messages.map((msg, idx) => {
+              const isUser = msg.role === "user";
+
+              // Parse assistant response into structured sections
+              let sections = [];
+              if (!isUser) {
+                const content = msg.content;
+                const shlokaMatch = content.match(/📜([\s\S]*?)(?=🔤|💬|$)/);
+                const transliterationMatch = content.match(/🔤([\s\S]*?)(?=💬|📜|$)/);
+                const meaningMatch = content.match(/💬([\s\S]*?)(?=📜|🔤|$)/);
+
+                if (shlokaMatch) sections.push({
+                  type: "shloka",
+                  title: "Sanskrit Shloka",
+                  icon: "📜",
+                  content: shlokaMatch[1].trim(),
+                  color: "from-amber-900/20 to-amber-950/10",
+                  border: "border-amber-800/30",
+                  textColor: "text-amber-200"
+                });
+
+                if (transliterationMatch) sections.push({
+                  type: "transliteration",
+                  title: "Transliteration",
+                  icon: "🔤",
+                  content: transliterationMatch[1].trim(),
+                  color: "from-blue-900/20 to-blue-950/10",
+                  border: "border-blue-800/30",
+                  textColor: "text-blue-200"
+                });
+
+                if (meaningMatch) sections.push({
+                  type: "meaning",
+                  title: "Meaning & Guidance",
+                  icon: "💬",
+                  content: meaningMatch[1].trim(),
+                  color: "from-emerald-900/20 to-emerald-950/10",
+                  border: "border-emerald-800/30",
+                  textColor: "text-emerald-200"
+                });
+
+                // If no markers found, treat as regular response
+                if (sections.length === 0 && content) {
+                  sections.push({
+                    type: "general",
+                    title: "Response",
+                    icon: "💭",
+                    content: content,
+                    color: "from-gray-800 to-gray-900",
+                    border: "border-gray-700",
+                    textColor: "text-gray-200"
+                  });
+                }
+              }
+
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[85%] ${isUser ? "w-fit" : "w-full"}`}
+                  >
+                    {isUser ? (
+                      <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl rounded-tr-none px-4 py-3 shadow-lg">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                            <span className="text-xs">👤</span>
+                          </div>
+                          <span className="text-sm font-medium opacity-90">You</span>
+                        </div>
+                        <p className="whitespace-pre-wrap">{msg.content}</p>
+                      </div>
+                    ) : (
+                      <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-2xl rounded-tl-none shadow-xl overflow-hidden">
+                        {/* Assistant header */}
+                        <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-800 to-gray-900 border-b border-gray-700">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
+                            <span className="text-white font-bold">V</span>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-100">VedAI</h3>
+                            <p className="text-xs text-gray-400">AI Spiritual Guide</p>
+                          </div>
+                        </div>
+
+                        {/* Content sections */}
+                        <div className="p-4 space-y-4">
+                          {sections.map((section, i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.1 }}
+                              className={`bg-gradient-to-br ${section.color} border ${section.border} rounded-xl p-4`}
+                            >
+                              <div className="flex items-center gap-2 mb-3">
+                                <span className="text-xl">{section.icon}</span>
+                                <h4 className={`font-semibold ${section.textColor}`}>{section.title}</h4>
+                                <div className="flex-1 h-px bg-gradient-to-r from-current opacity-20 ml-2"></div>
+                              </div>
+
+                              <div className="space-y-3">
+                                {section.content.split('\n\n').map((paragraph, pIdx) => (
+                                  paragraph.trim() && (
+                                    <motion.p
+                                      key={pIdx}
+                                      initial={{ opacity: 0 }}
+                                      animate={{ opacity: 1 }}
+                                      transition={{ delay: pIdx * 0.05 }}
+                                      className="text-gray-200 leading-relaxed whitespace-pre-wrap"
+                                    >
+                                      {paragraph}
+                                    </motion.p>
+                                  )
+                                ))}
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="px-4 py-3 bg-gray-900/50 border-t border-gray-800">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-sm text-gray-400">
+                              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                              <span>Source: Bhagavad Gita</span>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              Wisdom • Guidance • Enlightenment
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+
+            {/* Typing indicator */}
+            {typing && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex justify-start"
+              >
+                <div className="max-w-[85%] w-full bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-2xl rounded-tl-none shadow-xl overflow-hidden">
+                  <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-800 to-gray-900 border-b border-gray-700">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
+                      <span className="text-white font-bold">V</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-100">VedAI</h3>
+                      <p className="text-xs text-gray-400">AI Spiritual Guide</p>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150"></div>
+                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-300"></div>
+                      </div>
+                      <span className="text-gray-400 ml-2">Thinking...</span>
+                      <button
+                        onClick={() => setStopTyping(true)}
+                        className="ml-auto text-sm text-gray-500 hover:text-gray-300 px-3 py-1 rounded-md hover:bg-gray-800 transition-colors"
+                      >
+                        Stop
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
           <div ref={chatEndRef} />
         </div>
 
-        {/* Sticky Input */}
-        <div className="sticky bottom-0 p-4 md:p-6 bg-black/40 backdrop-blur-xl border-t border-white/10 flex items-center gap-3 z-50">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder={
-              userRole === "premium"
-                ? "💫 Ask VedAI anything (Premium)"
-                : limitReached
-                  ? "⏳ Upgrade for unlimited access"
-                  : `📝 Ask VedAI... (${FREE_CHAT_LIMIT - chatCount} left today)`
-            }
-            className="flex-1 px-5 py-3 rounded-full bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            disabled={limitReached && userRole === "free"}
-          />
-          <button
-            onClick={sendMessage}
-            className="p-3 md:p-4 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg hover:scale-105 transition"
-            disabled={(limitReached && userRole === "free") || !input.trim()}
-          >
-            <Send size={22} />
-          </button>
-          <button onClick={toggleTheme} className="ml-2">{theme === "dark" ? "🌞" : "🌙"}</button>
-          <button onClick={deleteChats} className="ml-2 text-red-400">🗑️</button>
+        {/* Input Area */}
+        <div className="sticky bottom-0 p-4 bg-gradient-to-t from-[#0f0f0f] to-transparent backdrop-blur-lg border-t border-gray-800">
+          <div className="mx-auto max-w-3xl">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  placeholder={
+                    userRole === "premium"
+                      ? "💫 Ask VedAI anything (Premium User)"
+                      : limitReached
+                        ? "⏳ Upgrade to Premium for unlimited access"
+                        : `Ask your spiritual question... (${FREE_CHAT_LIMIT - chatCount} left today)`
+                  }
+                  className="w-full px-5 py-3.5 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={limitReached && userRole === "free"}
+                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                  {!input.trim() ? "⏎" : "⌘⏎"}
+                </div>
+              </div>
+
+              <button
+                onClick={sendMessage}
+                disabled={(limitReached && userRole === "free") || !input.trim()}
+                className="p-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg hover:shadow-orange-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
+              >
+                <Send size={20} />
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleTheme}
+                  className="p-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
+                >
+                  {theme === "dark" ? "🌞" : "🌙"}
+                </button>
+                <button
+                  onClick={() => setMessages([])}
+                  className="p-2.5 rounded-lg bg-gray-800 hover:bg-red-900/30 text-red-400 hover:text-red-300 transition-colors"
+                  title="Clear conversation"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center gap-4 mt-3 text-xs text-gray-500">
+              <span>Press Enter to send</span>
+              <span>•</span>
+              <span>Shift + Enter for new line</span>
+              <span>•</span>
+              <span>Esc to cancel</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -619,7 +741,7 @@ export default function ChatPage() {
 
               <div
                 onClick={() => initiatePayment("yearly")}
-                className="p-4 border-2 border-orange-500 rounded-xl cursor-pointer hover:border-orange-600 transition-all bg-orange-50"
+                className="p-4 border-2 border-orange-500 rounded-xl cursor-pointer hover:border-orange-600 transition-all bg-orange-50 relative"
               >
                 <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
                   <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
