@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function ContactSection() {
   const [form, setForm] = useState({
     name: "",
@@ -32,7 +34,7 @@ export default function ContactSection() {
     try {
       setLoading(true);
 
-      await axios.post("http://localhost:5000/api/contact", form);
+      await axios.post(`${API_URL}/api/contact`, form);
 
       setSuccess(true);
       setForm({
@@ -43,6 +45,7 @@ export default function ContactSection() {
         company: "",
       });
     } catch (err) {
+      console.error("Contact error:", err);
       setError("Something went wrong. Please try again later.");
     } finally {
       setLoading(false);
@@ -83,7 +86,7 @@ export default function ContactSection() {
             Contact <span className="text-orange-500">VedAI</span>
           </h2>
           <p className="mt-4 text-lg text-neutral-400">
-            Have a question, issue, or feedback?  
+            Have a question, issue, or feedback?
             We’re here to guide you on your spiritual journey.
           </p>
         </div>
@@ -97,7 +100,7 @@ export default function ContactSection() {
           transition={{ duration: 0.8 }}
           className="bg-neutral-900/80 backdrop-blur-xl border border-orange-800/40 rounded-3xl p-8 shadow-[0_0_80px_rgba(255,140,0,0.25)] space-y-6"
         >
-          {/* Honeypot (hidden) */}
+          {/* Honeypot */}
           <input
             type="text"
             name="company"
@@ -148,9 +151,7 @@ export default function ContactSection() {
           />
 
           {/* Status */}
-          {error && (
-            <p className="text-red-400 text-sm">{error}</p>
-          )}
+          {error && <p className="text-red-400 text-sm">{error}</p>}
 
           {success && (
             <p className="text-green-400 text-sm">
