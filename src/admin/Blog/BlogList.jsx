@@ -4,13 +4,15 @@ import { Link } from "react-router-dom";
 import { Eye, Pencil, Trash2, Plus } from "lucide-react";
 import api from "../.././utils/api";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function BlogList() {
   const [blogs, setBlogs] = useState([]);
   const token = localStorage.getItem("token");
 
   const loadBlogs = async () => {
     const res = await axios.get(
-      "http://localhost:5000/api/blogs/admin",
+      `${API_URL}/api/blogs/admin`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -20,7 +22,7 @@ export default function BlogList() {
 
   const removeBlog = async (id) => {
     if (!confirm("Delete this blog permanently?")) return;
-    await axios.delete(`http://localhost:5000/api/blogs/${id}`, {
+    await axios.delete(`${API_URL}/api/blogs/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     loadBlogs();

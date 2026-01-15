@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function ContactView() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -12,8 +14,10 @@ export default function ContactView() {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
+    if (!token) return;
+
     axios
-      .get(`http://localhost:5000/api/admin/contacts/${id}`, {
+      .get(`${API_URL}/api/admin/contacts/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setContact(res.data.contact))
@@ -27,7 +31,7 @@ export default function ContactView() {
       setSending(true);
 
       await axios.post(
-        `http://localhost:5000/api/admin/contacts/${id}/reply`,
+        `${API_URL}/api/admin/contacts/${id}/reply`,
         { reply },
         { headers: { Authorization: `Bearer ${token}` } }
       );

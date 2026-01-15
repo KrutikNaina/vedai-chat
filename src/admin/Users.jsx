@@ -3,13 +3,15 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FiEye, FiTrash2 } from "react-icons/fi";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Users() {
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   const loadUsers = async () => {
-    const res = await axios.get("http://localhost:5000/api/admin/users", {
+    const res = await axios.get(`${API_URL}/api/admin/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setUsers(res.data.users);
@@ -21,7 +23,7 @@ export default function Users() {
 
   const deleteUser = async (id) => {
     if (!confirm("Delete this user?")) return;
-    await axios.delete(`http://localhost:5000/api/admin/users/${id}`, {
+    await axios.delete(`${API_URL}/api/admin/users/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     loadUsers();

@@ -8,6 +8,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [usage, setUsage] = useState([]);
@@ -18,13 +20,13 @@ export default function Dashboard() {
     const token = localStorage.getItem("token");
 
     axios
-      .get("http://localhost:5000/api/admin/dashboard", {
+      .get(`${API_URL}/api/admin/dashboard`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
         const data = res.data;
 
-        // 🔒 SAFE NORMALIZATION (NO UI CRASH)
+        // 🔒 SAFE NORMALIZATION
         setStats({
           ...data,
 
@@ -53,7 +55,7 @@ export default function Dashboard() {
       });
 
     axios
-      .get("http://localhost:5000/api/admin/api-logs/per-user", {
+      .get(`${API_URL}/api/admin/api-logs/per-user`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUsage(res.data.usage || []));
@@ -63,12 +65,13 @@ export default function Dashboard() {
     <div className="p-6 rounded-xl bg-neutral-900 border border-neutral-800">
       <h3 className="text-neutral-400">{title}</h3>
       <p
-        className={`text-3xl font-bold ${danger
+        className={`text-3xl font-bold ${
+          danger
             ? "text-red-500"
             : warning
-              ? "text-yellow-400"
-              : "text-orange-500"
-          }`}
+            ? "text-yellow-400"
+            : "text-orange-500"
+        }`}
       >
         {value}
       </p>
@@ -109,7 +112,7 @@ export default function Dashboard() {
       {/* SEO HEALTH */}
       <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-xl mb-8">
         <h2 className="text-lg font-semibold text-orange-400 mb-4">
-           Blog SEO Health
+          Blog SEO Health
         </h2>
 
         <div className="flex items-center gap-6">
@@ -120,12 +123,13 @@ export default function Dashboard() {
           <p className="text-neutral-300">
             SEO Strength:{" "}
             <span
-              className={`font-bold ${stats.blogs.seoStatus === "Strong"
+              className={`font-bold ${
+                stats.blogs.seoStatus === "Strong"
                   ? "text-green-500"
                   : stats.blogs.seoStatus === "Medium"
-                    ? "text-yellow-400"
-                    : "text-red-500"
-                }`}
+                  ? "text-yellow-400"
+                  : "text-red-500"
+              }`}
             >
               {stats.blogs.seoStatus}
             </span>
@@ -155,23 +159,10 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card
-            title="Avg Response (ms)"
-            value={stats.apiHealth.avgResponseTime}
-          />
-          <Card
-            title="Max Response (ms)"
-            value={stats.apiHealth.maxResponseTime}
-          />
-          <Card
-            title="Fast Responses"
-            value={stats.apiHealth.fastResponses}
-          />
-          <Card
-            title="Slow Responses"
-            value={stats.apiHealth.slowResponses}
-            warning
-          />
+          <Card title="Avg Response (ms)" value={stats.apiHealth.avgResponseTime} />
+          <Card title="Max Response (ms)" value={stats.apiHealth.maxResponseTime} />
+          <Card title="Fast Responses" value={stats.apiHealth.fastResponses} />
+          <Card title="Slow Responses" value={stats.apiHealth.slowResponses} warning />
         </div>
       </div>
 
@@ -179,18 +170,12 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-xl">
           <h2 className="text-lg font-semibold text-orange-400 mb-4">
-             Token Usage by User
+            Token Usage by User
           </h2>
 
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie
-                data={usage}
-                dataKey="totalTokens"
-                nameKey="email"
-                outerRadius={110}
-                label
-              >
+              <Pie data={usage} dataKey="totalTokens" nameKey="email" outerRadius={110} label>
                 {usage.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
@@ -207,13 +192,7 @@ export default function Dashboard() {
 
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie
-                data={usage}
-                dataKey="totalCost"
-                nameKey="email"
-                outerRadius={110}
-                label
-              >
+              <Pie data={usage} dataKey="totalCost" nameKey="email" outerRadius={110} label>
                 {usage.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
@@ -237,7 +216,7 @@ export default function Dashboard() {
 
       {/* EXPORT */}
       <a
-        href="http://localhost:5000/api/admin/export/api-logs"
+        href={`${API_URL}/api/admin/export/api-logs`}
         className="inline-block mt-4 px-4 py-2 bg-orange-600 rounded-md text-white"
       >
         Export API Logs CSV

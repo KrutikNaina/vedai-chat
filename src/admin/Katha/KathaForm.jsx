@@ -1,5 +1,6 @@
 import { Plus, Trash } from "lucide-react";
 
+
 export default function KathaForm({ form, setForm, onSubmit, submitText }) {
   const updateStep = (i, field, value) => {
     const steps = [...form.steps];

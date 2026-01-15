@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import MarkdownEditor from "./MarkdownEditor";
 import BlogEditor from "./BlogEditor";
 
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function AddBlog() {
     const navigate = useNavigate();
@@ -37,7 +38,7 @@ export default function AddBlog() {
     const submit = async () => {
         try {
             await axios.post(
-                "http://localhost:5000/api/blogs",
+                `${API_URL}/api/blogs`,
                 {
                     ...form,
                     tags: form.tags.split(",").map((t) => t.trim()),
@@ -58,7 +59,7 @@ export default function AddBlog() {
             data.append("image", file);
 
             const res = await axios.post(
-                "http://localhost:5000/api/upload/image",
+                `${API_URL}/api/upload/image`,
                 data,
                 {
                     headers: {

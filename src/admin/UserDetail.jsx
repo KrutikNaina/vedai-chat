@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function UserDetail() {
   const { id } = useParams();
   const [usage, setUsage] = useState(null);
@@ -9,7 +11,7 @@ export default function UserDetail() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/admin/users/${id}/usage`, {
+      .get(`${API_URL}/api/admin/users/${id}/usage`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUsage(res.data));

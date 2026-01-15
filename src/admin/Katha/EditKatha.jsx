@@ -3,6 +3,8 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import KathaForm from "./KathaForm";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function EditKatha() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -11,13 +13,13 @@ export default function EditKatha() {
   const [form, setForm] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/ekatha/${id}`).then((res) => {
+    axios.get(`${API_URL}/api/ekatha/${id}`).then((res) => {
       setForm(res.data);
     });
   }, []);
 
   const submit = async () => {
-    await axios.put(`http://localhost:5000/api/ekatha/${id}`, form, {
+    await axios.put(`${API_URL}/api/ekatha/${id}`, form, {
       headers: { Authorization: `Bearer ${token}` },
     });
     navigate("/admin/katha");

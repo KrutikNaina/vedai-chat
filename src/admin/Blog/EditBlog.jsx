@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import MarkdownEditor from "./MarkdownEditor";
 import BlogEditor from "./BlogEditor";
 
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function EditBlog() {
   const { id } = useParams();
@@ -15,7 +16,7 @@ export default function EditBlog() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/blogs/id/${id}`, {
+      .get(`${API_URL}/api/blogs/id/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -37,7 +38,7 @@ export default function EditBlog() {
   const save = async () => {
     try {
       await axios.put(
-        `http://localhost:5000/api/blogs/${id}`,
+        `${API_URL}/api/blogs/${id}`,
         {
           ...form,
           tags: form.tags.split(",").map((t) => t.trim()),
@@ -60,7 +61,7 @@ export default function EditBlog() {
       data.append("image", file);
 
       const res = await axios.post(
-        "http://localhost:5000/api/upload/image",
+        `${API_URL}/api/upload/image`,
         data,
         {
           headers: {

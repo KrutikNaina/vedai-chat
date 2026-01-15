@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function ViewKatha() {
   const { id } = useParams();
   const [katha, setKatha] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/ekatha/${id}`).then((res) => {
+    axios.get(`${API_URL}/api/ekatha/${id}`).then((res) => {
       setKatha(res.data);
     });
   }, []);

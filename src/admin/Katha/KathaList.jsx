@@ -9,19 +9,21 @@ import {
   BookOpen
 } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function KathaList() {
   const [kathas, setKathas] = useState([]);
   const token = localStorage.getItem("token");
 
   const loadKathas = async () => {
-    const res = await axios.get("http://localhost:5000/api/ekatha");
+    const res = await axios.get(`${API_URL}/api/ekatha`);
     setKathas(res.data);
   };
 
   const deleteKatha = async (id) => {
     if (!confirm("Are you sure you want to delete this Katha?")) return;
 
-    await axios.delete(`http://localhost:5000/api/ekatha/${id}`, {
+    await axios.delete(`${API_URL}/api/ekatha/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

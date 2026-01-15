@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import KathaForm from "./KathaForm";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function AddKatha() {
   const token = localStorage.getItem("token");
 
@@ -23,7 +25,7 @@ export default function AddKatha() {
   });
 
   const submit = async () => {
-    await axios.post("http://localhost:5000/api/ekatha", form, {
+    await axios.post(`${API_URL}/api/ekatha`, form, {
       headers: { Authorization: `Bearer ${token}` },
     });
     alert("Katha added successfully");

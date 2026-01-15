@@ -1,8 +1,9 @@
-// vedai-landing\src\api\ekathaApi.jsx
 import axios from "axios";
 
-const API_BASE = "http://localhost:5000/api/ekatha";
-const PROGRESS_BASE = "http://localhost:5000/api/ekatha-progress";
+const API_URL = import.meta.env.VITE_API_URL;
+
+const API_BASE = `${API_URL}/api/ekatha`;
+const PROGRESS_BASE = `${API_URL}/api/ekatha-progress`;
 
 // Helper to get headers with token
 const getAuthHeaders = (token) => ({
@@ -24,17 +25,24 @@ export const fetchKathaById = async (id) => {
 // Save progress (requires JWT token)
 export const saveProgress = async (kathaId, currentStep, token) => {
   if (!token) throw new Error("No token provided for saveProgress");
+
   const res = await axios.post(
     `${PROGRESS_BASE}/save/${kathaId}`,
     { currentStep },
     getAuthHeaders(token)
   );
+
   return res.data;
 };
 
 // Get user progress (requires JWT token)
 export const getProgress = async (kathaId, token) => {
   if (!token) throw new Error("No token provided for getProgress");
-  const res = await axios.get(`${PROGRESS_BASE}/get/${kathaId}`, getAuthHeaders(token));
+
+  const res = await axios.get(
+    `${PROGRESS_BASE}/get/${kathaId}`,
+    getAuthHeaders(token)
+  );
+
   return res.data;
 };
