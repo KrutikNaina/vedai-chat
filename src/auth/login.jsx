@@ -23,42 +23,47 @@ const Login = () => {
   // ⭐ GOOGLE LOGIN POPUP HANDLER
   // -----------------------------
   const handleGoogleLogin = () => {
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    if (!API_URL) {
+      setWarning("Backend URL not configured");
+      return;
+    }
+
     const width = 600;
     const height = 700;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
 
-    // OPEN POPUP
     const popup = window.open(
-      "http://localhost:5000/auth/google",
+      `${API_URL}/auth/google`,
       "GoogleAuth",
       `width=${width},height=${height},top=${top},left=${left}`
     );
 
     const messageHandler = (event) => {
-      if (event.origin !== "http://localhost:5000") return;
-
-      // SUCCESS
-      if (event.data?.type === "oauth-success") {
-        const token = event.data.token;
-
-        localStorage.setItem("token", token);
-        window.dispatchEvent(new Event("tokenUpdated")); // refresh navbar
-        popup?.close();
-
-        navigate("/"); // redirect user
+      // ✅ allow local + production backend
+      if (
+        !event.origin.includes("localhost:5000") &&
+        !event.origin.includes("vedai-backend.onrender.com")
+      ) {
+        return;
       }
 
-      // FAILURE
+      if (event.data?.type === "oauth-success") {
+        localStorage.setItem("token", event.data.token);
+        window.dispatchEvent(new Event("tokenUpdated"));
+        popup?.close();
+        navigate("/");
+      }
+
       if (event.data?.type === "oauth-failure") {
         setWarning("Google Authentication Failed. Try Again.");
       }
     };
 
-    // Listen for OAuth Response
     window.addEventListener("message", messageHandler);
 
-    // Cleanup when popup closes
     const timer = setInterval(() => {
       if (popup?.closed) {
         clearInterval(timer);
