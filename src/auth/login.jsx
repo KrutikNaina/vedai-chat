@@ -20,7 +20,7 @@ const Login = () => {
   };
 
   // -----------------------------
-  // ⭐ GOOGLE LOGIN POPUP HANDLER
+  // ⭐ GOOGLE LOGIN POPUP HANDLER (FIXED)
   // -----------------------------
   const handleGoogleLogin = () => {
     const API_URL = import.meta.env.VITE_API_URL;
@@ -41,35 +41,92 @@ const Login = () => {
       `width=${width},height=${height},top=${top},left=${left}`
     );
 
+    // ✅ Track if popup is opened successfully
+    let popupClosed = false;
+
     const messageHandler = (event) => {
-      // ✅ allow local + production backend
-      if (
-        !event.origin.includes("localhost:5000") &&
-        !event.origin.includes("vedai-backend.onrender.com")
-      ) {
+      // ✅ Validate origin - allow both localhost and production
+      const allowedOrigins = [
+        'http://localhost:5000',
+        'https://vedai-backend.onrender.com'
+      ];
+
+      const isAllowedOrigin = allowedOrigins.some(origin => 
+        event.origin === origin || event.origin.startsWith(origin)
+      );
+
+      if (!isAllowedOrigin) {
         return;
       }
 
       if (event.data?.type === "oauth-success") {
         localStorage.setItem("token", event.data.token);
         window.dispatchEvent(new Event("tokenUpdated"));
-        popup?.close();
-        navigate("/");
+        
+        // ✅ Mark as closed to stop polling
+        popupClosed = true;
+        
+        // ✅ Try to close popup safely (wrapped in try-catch)
+        try {
+          if (popup && !popup.closed) {
+            popup.close();
+          }
+        } catch (err) {
+          // Silently handle COOP errors - popup will close itself
+          console.log("Popup closed by browser policy");
+        }
+        
+        navigate("/chat");
       }
 
       if (event.data?.type === "oauth-failure") {
         setWarning("Google Authentication Failed. Try Again.");
+        popupClosed = true;
+        
+        try {
+          if (popup && !popup.closed) {
+            popup.close();
+          }
+        } catch (err) {
+          console.log("Popup closed by browser policy");
+        }
       }
     };
 
     window.addEventListener("message", messageHandler);
 
+    // ✅ FIXED: Safe popup polling without COOP errors
     const timer = setInterval(() => {
-      if (popup?.closed) {
+      // If we already handled the auth, stop checking
+      if (popupClosed) {
         clearInterval(timer);
         window.removeEventListener("message", messageHandler);
+        return;
       }
-    }, 500);
+
+      // ✅ Try-catch to handle COOP errors gracefully
+      try {
+        if (popup && popup.closed) {
+          clearInterval(timer);
+          window.removeEventListener("message", messageHandler);
+          
+          // Only show warning if auth wasn't successful
+          if (!popupClosed) {
+            setWarning("Authentication cancelled. Please try again.");
+          }
+        }
+      } catch (err) {
+        // ✅ Silently handle COOP errors
+        // The messageHandler will handle success/failure
+        console.log("Cannot check popup status due to browser policy");
+      }
+    }, 1000); // Check every 1 second instead of 500ms
+
+    // ✅ Cleanup after 5 minutes (in case something goes wrong)
+    setTimeout(() => {
+      clearInterval(timer);
+      window.removeEventListener("message", messageHandler);
+    }, 300000);
   };
 
   // -----------------------------
@@ -145,7 +202,13 @@ const Login = () => {
         </p>
 
         {warning && (
-          <p className="mb-4 text-center text-yellow-400 font-medium">{warning}</p>
+          <motion.p 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 text-center text-yellow-400 font-medium bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-3"
+          >
+            {warning}
+          </motion.p>
         )}
 
         {/* ---------------------- */}
@@ -224,7 +287,7 @@ const Login = () => {
 
         {/* SIGNUP LINK */}
         <p className="mt-6 text-center text-neutral-500 text-sm">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <a href="/signup" className="text-orange-500 hover:underline">Sign up</a>
         </p>
       </motion.div>

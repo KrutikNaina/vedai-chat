@@ -1,9 +1,12 @@
+// vedai-landing/src/E-Katha/api/progressApi.js
 import axios from "axios";
 
-const PROGRESS_BASE = "http://localhost:5000/api/ekatha-progress";
+const PROGRESS_BASE = `${import.meta.env.VITE_API_URL}/api/ekatha-progress`;
 
 const getAuthHeaders = (token) => ({
-  headers: { Authorization: `Bearer ${token}` },
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
 });
 
 export const saveProgress = async (kathaId, currentStep, token) => {

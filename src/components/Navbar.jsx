@@ -30,9 +30,12 @@ const Navbar = () => {
         return;
       }
 
-      const res = await fetch("http://localhost:5000/auth/user", {
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const res = await fetch(`${API_URL}/auth/user`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
 
       if (res.ok) {
         const data = await res.json();
@@ -56,9 +59,9 @@ const Navbar = () => {
   // Re-fetch user when location changes (navigation happens)
   useEffect(() => {
     // Only re-fetch if we're navigating away from login/signup
-    if (!location.pathname.startsWith("/login") && 
-        !location.pathname.startsWith("/signup") &&
-        !location.pathname.startsWith("/admin")) {
+    if (!location.pathname.startsWith("/login") &&
+      !location.pathname.startsWith("/signup") &&
+      !location.pathname.startsWith("/admin")) {
       fetchUser();
     }
   }, [location.pathname]);

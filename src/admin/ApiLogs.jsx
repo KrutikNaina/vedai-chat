@@ -12,13 +12,6 @@ export default function ApiLogs() {
       setError("");
 
       const res = await api.get("/api/admin/api-logs");
-
-      /**
-       * ✅ SUPPORT BOTH RESPONSE FORMATS
-       * { logs: [] }
-       * OR
-       * []
-       */
       const logsData = Array.isArray(res.data?.logs)
         ? res.data.logs
         : Array.isArray(res.data)
@@ -29,7 +22,7 @@ export default function ApiLogs() {
     } catch (err) {
       console.error("Failed to load API logs:", err);
 
-      // 🔐 Handle auth / permission errors cleanly
+      //  Handle auth / permission errors cleanly
       if (err.response?.status === 401 || err.response?.status === 403) {
         setError("You are not authorized to view API logs.");
       } else {
@@ -65,7 +58,7 @@ export default function ApiLogs() {
           </thead>
 
           <tbody>
-            {/* 🔄 LOADING */}
+            {/*  LOADING */}
             {loading && (
               <tr>
                 <td colSpan="5" className="p-6 text-center text-neutral-500">
@@ -74,7 +67,7 @@ export default function ApiLogs() {
               </tr>
             )}
 
-            {/* ❌ ERROR */}
+            {/*  ERROR */}
             {!loading && error && (
               <tr>
                 <td colSpan="5" className="p-6 text-center text-red-400">
@@ -83,7 +76,7 @@ export default function ApiLogs() {
               </tr>
             )}
 
-            {/* ✅ DATA */}
+            {/*  DATA */}
             {!loading &&
               !error &&
               logs.map((log) => (
@@ -129,7 +122,7 @@ export default function ApiLogs() {
                 </tr>
               ))}
 
-            {/* 📭 EMPTY */}
+            {/* EMPTY */}
             {!loading && !error && logs.length === 0 && (
               <tr>
                 <td colSpan="5" className="p-6 text-center text-neutral-500">

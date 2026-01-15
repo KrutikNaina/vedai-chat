@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FiTrash2, FiSun, FiMoon } from "react-icons/fi";
 
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
@@ -32,46 +33,56 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const chatEndRef = useRef(null);
 
-  // Authenticate user
+  // Fetch chat history and user count
+  const fetchHistory = async (token = null) => {
+    const authToken = token || localStorage.getItem("token");
+    if (!authToken) return;
+    try {
+      const res = await fetch(`${API_URL}/api/chat/history`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setChatHistory(Array.isArray(data.chats) ? data.chats : []);
+
+        if (data.remainingChats !== undefined) {
+          const remaining = data.remainingChats;
+          setChatCount(remaining === "unlimited" ? 0 : FREE_CHAT_LIMIT - remaining);
+          setLimitReached(remaining === "unlimited" ? false : remaining <= 0);
+        }
+      } else {
+        setChatHistory([]);
+      }
+    } catch (err) {
+      console.error("Error fetching history:", err);
+      setChatHistory([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Authenticate user and load history
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
     } else {
       fetchUserData(token);
+      fetchHistory(token); // ✅ Load history on mount
     }
   }, [navigate]);
+  
 
-  // Fetch user data and subscription status
   const fetchUserData = async (token) => {
     try {
-      const userRes = await fetch("http://localhost:5000/auth/user", {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch(`${API_URL}/auth/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      if (userRes.ok) {
-        const userData = await userRes.json();
-        setUserRole(userData.role || "free");
-
-        const subRes = await fetch("http://localhost:5000/api/payment/subscription", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (subRes.ok) {
-          const subData = await subRes.json();
-          if (subData.isActive) {
-            setUserRole("premium");
-            setLimitReached(false);
-          }
-        }
-
-        setLoading(false);
-        fetchHistory(token);
-      } else {
-        throw new Error("Invalid token");
-      }
+      if (!res.ok) throw new Error("Invalid token");
     } catch (err) {
-      console.error("Error fetching user data:", err);
       localStorage.removeItem("token");
       navigate("/login");
     }
@@ -84,7 +95,7 @@ export default function ChatPage() {
       if (!token) return;
 
       const res = await fetch(
-        `http://localhost:5000/api/chat/${chatId}`,
+        `${API_URL}/api/chat/${chatId}`,
         {
           method: "DELETE",
           headers: {
@@ -113,40 +124,12 @@ export default function ChatPage() {
     }
   };
 
-
-
-  // Fetch chat history and user count
-  const fetchHistory = async (token = null) => {
-    const authToken = token || localStorage.getItem("token");
-    if (!authToken) return;
-    try {
-      const res = await fetch("http://localhost:5000/api/chat/history", {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setChatHistory(Array.isArray(data.chats) ? data.chats : []);
-
-        if (data.remainingChats !== undefined) {
-          const remaining = data.remainingChats;
-          setChatCount(remaining === "unlimited" ? 0 : FREE_CHAT_LIMIT - remaining);
-          setLimitReached(remaining === "unlimited" ? false : remaining <= 0);
-        }
-      } else {
-        setChatHistory([]);
-      }
-    } catch (err) {
-      console.error("Error fetching history:", err);
-      setChatHistory([]);
-    }
-  };
-
   // Save chat
   const saveChatToDB = async (allMessages) => {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      await fetch("http://localhost:5000/api/chat", {
+      await fetch(`${API_URL}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -176,7 +159,7 @@ export default function ChatPage() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5000/api/chat/ask", {
+      const res = await fetch(`${API_URL}/api/chat/ask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -256,123 +239,13 @@ export default function ChatPage() {
     if (window.innerWidth < 768) setSidebarOpen(false);
   };
 
-  // Payment Integration
-  const handleUpgradeClick = () => {
-    setShowPaymentModal(true);
-  };
-
-  const handlePaymentSuccess = () => {
-    setShowPaymentModal(false);
-    setUserRole("premium");
-    setLimitReached(false);
-    setChatCount(0);
-
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchUserData(token);
-    }
-  };
-
-  // Razorpay Payment Handler
-  const initiatePayment = async (plan) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Please login first");
-        return;
-      }
-
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) {
-        alert("Payment system is loading, please try again.");
-        return;
-      }
-
-      const orderResponse = await fetch("http://localhost:5000/api/payment/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ plan: plan })
-      });
-
-      const orderData = await orderResponse.json();
-
-      if (!orderData.success) {
-        throw new Error(orderData.message);
-      }
-
-      const options = {
-        key: orderData.key,
-        amount: orderData.order.amount,
-        currency: orderData.order.currency,
-        name: "VedAI Premium",
-        description: `Premium ${plan === "yearly" ? "Yearly" : "Monthly"} Subscription`,
-        order_id: orderData.order.id,
-        handler: async function (response) {
-          try {
-            const verifyResponse = await fetch("http://localhost:5000/api/payment/verify-payment", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-              },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
-              })
-            });
-
-            const verifyData = await verifyResponse.json();
-
-            if (verifyData.success) {
-              alert("🎉 Payment successful! Welcome to VedAI Premium!");
-              handlePaymentSuccess();
-            } else {
-              alert("❌ Payment verification failed. Please contact support.");
-            }
-          } catch (err) {
-            console.error("Payment verification error:", err);
-            alert("❌ Payment verification failed. Please contact support.");
-          }
-        },
-        prefill: {
-          name: "User",
-          email: "user@example.com",
-        },
-        theme: {
-          color: "#f97316"
-        }
-      };
-
-      const razorpayInstance = new window.Razorpay(options);
-      razorpayInstance.open();
-
-    } catch (err) {
-      console.error("Payment error:", err);
-      alert(err.message || "Payment failed. Please try again.");
-    }
-  };
-
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
 
   // Helpers
   const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  const newChat = () => setMessages([]);
+  const newChat = () => setMessages([{
+    role: "assistant",
+    content: "🙏 Namaste! I am VedAI, your AI Guru. Ask me anything and I'll guide you with wisdom from the Bhagavad Gita.",
+  }]);
 
   // Auto-scroll
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
@@ -389,6 +262,19 @@ export default function ChatPage() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Auto scroll to bottom when new message
+  useEffect(() => {
+    if (shouldAutoScroll && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, shouldAutoScroll]);
+
+  // Handle upgrade click (you need to implement this)
+  const handleUpgradeClick = () => {
+    // Navigate to pricing or show modal
+    console.log("Upgrade clicked");
+  };
 
 
   return (
@@ -437,7 +323,11 @@ export default function ChatPage() {
 
           {/* ✅ ONLY scrollable area */}
           <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3">
-            {chatHistory.length === 0 && !sidebarMini && (
+            {loading && !sidebarMini && (
+              <p className="text-gray-400 text-sm">Loading chats...</p>
+            )}
+            
+            {!loading && chatHistory.length === 0 && !sidebarMini && (
               <p className="text-gray-400 text-sm">No chats yet.</p>
             )}
 
@@ -476,6 +366,18 @@ export default function ChatPage() {
         className={`flex-1 flex flex-col transition-all duration-300
         ${sidebarMini ? "md:ml-[72px]" : "md:ml-[260px]"}`}
       >
+        {/* Mobile menu button */}
+        <div className="md:hidden p-4 border-b border-gray-800 flex items-center justify-between">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700"
+          >
+            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          <h1 className="text-lg font-bold">VedAI</h1>
+          <div className="w-10"></div>
+        </div>
+
         {/* Chat messages container */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
           {/* Limit reached warning */}
@@ -683,7 +585,7 @@ export default function ChatPage() {
                   className=" w-full px-5 py-3.5 rounded-xl  bg-gray-900 border border-gray-700 
                   text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent
                     disabled:opacity-50 disabled:cursor-not-allowed resize-none overflow-hidden leading-relaxed "
-                  style={{ maxHeight: "180px" }} // same as ChatGPT
+                  style={{ maxHeight: "180px" }}
                 />
 
                 <div className="absolute right-3 bottom-3 text-gray-500 text-sm">
@@ -713,7 +615,10 @@ export default function ChatPage() {
 
                 </button>
                 <button
-                  onClick={() => setMessages([])}
+                  onClick={() => setMessages([{
+                    role: "assistant",
+                    content: "🙏 Namaste! I am VedAI, your AI Guru. Ask me anything and I'll guide you with wisdom from the Bhagavad Gita.",
+                  }])}
                   className="p-2.5 rounded-lg bg-gray-800 hover:bg-red-900/30 text-red-400 hover:text-red-300 transition-colors"
                   title="Clear conversation"
                 >
