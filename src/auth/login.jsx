@@ -76,7 +76,7 @@ const Login = () => {
           console.log("Popup closed by browser policy");
         }
         
-        navigate("/chat");
+        navigate("/chatpage");
       }
 
       if (event.data?.type === "oauth-failure") {
