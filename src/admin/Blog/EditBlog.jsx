@@ -54,6 +54,25 @@ export default function EditBlog() {
       console.error(err);
       alert("Update failed");
     }
+
+    const uploadCover = async (file) => {
+      const data = new FormData();
+      data.append("image", file);
+
+      const res = await axios.post(
+        "http://localhost:5000/api/upload/image",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setForm({ ...form, coverImage: res.data.url });
+    };
+
   };
 
   if (loading) return <p>Loading...</p>;
@@ -103,12 +122,12 @@ export default function EditBlog() {
 
         {/* Cover Image */}
         <div>
-          <label className="label">Cover Image URL</label>
+          <label className="label">Cover Image</label>
+
           <input
-            value={form.coverImage || ""}
-            onChange={(e) =>
-              setForm({ ...form, coverImage: e.target.value })
-            }
+            type="file"
+            accept="image/*"
+            onChange={(e) => uploadCover(e.target.files[0])}
             className="input"
           />
 
@@ -120,6 +139,7 @@ export default function EditBlog() {
             />
           )}
         </div>
+
 
         {/* Category + Status */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

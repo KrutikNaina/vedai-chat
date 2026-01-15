@@ -12,6 +12,8 @@ import HeroSection from "./components/HeroSection";
 import FeatureSection from "./components/FeatureSection";
 import LiveChatPreview from "./components/LiveChatPreview";
 import Testimonials from "./components/Testimonials";
+import ContactSection from "./components/ContactSection";
+
 
 /* Auth */
 import Login from "./auth/login";
@@ -47,6 +49,10 @@ import AddKatha from "./admin/Katha/AddKatha";
 import EditKatha from "./admin/Katha/EditKatha";
 import ViewKatha from "./admin/Katha/ViewKatha";
 
+/* Admin – Contact */
+import Contacts from "./admin/Contacts";
+import ContactView  from "./admin/ContactView";
+
 /* Admin – API */
 import ApiLogs from "./admin/ApiLogs";
 
@@ -80,6 +86,7 @@ const App = () => {
                   <FeatureSection />
                   <LiveChatPreview />
                   <Testimonials />
+                  <ContactSection />
                   <Footer />
                 </div>
               </>
@@ -128,6 +135,10 @@ const App = () => {
             <Route path="blog" element={<AdminBlogList />} />
             <Route path="blog/add" element={<AddBlog />} />
             <Route path="blog/edit/:id" element={<EditBlog />} />
+
+            {/* Contact Admin */}
+            <Route path="contacts" element={<Contacts />} />
+            <Route path="contacts/:id" element={<ContactView />} />
 
             {/* API Logs */}
             <Route path="api-logs" element={<ApiLogs />} />

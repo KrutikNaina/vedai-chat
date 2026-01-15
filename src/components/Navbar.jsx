@@ -20,37 +20,58 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-
-        const res = await fetch("http://localhost:5000/auth/user", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-        } else {
-          setUser(null);
-        }
-      } catch {
+  // Fetch user function
+  const fetchUser = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
         setUser(null);
-      } finally {
         setLoading(false);
+        return;
       }
-    };
+
+      const res = await fetch("http://localhost:5000/auth/user", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data);
+      } else {
+        setUser(null);
+        localStorage.removeItem("token"); // Clear invalid token
+      }
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial fetch on mount
+  useEffect(() => {
     fetchUser();
   }, []);
 
-  const hideNavbarPaths = ["/login", "/signup"];
-  if (hideNavbarPaths.includes(location.pathname)) return null;
+  // Re-fetch user when location changes (navigation happens)
+  useEffect(() => {
+    // Only re-fetch if we're navigating away from login/signup
+    if (!location.pathname.startsWith("/login") && 
+        !location.pathname.startsWith("/signup") &&
+        !location.pathname.startsWith("/admin")) {
+      fetchUser();
+    }
+  }, [location.pathname]);
+
+  const hideNavbarPaths = ["/login", "/signup", "/chatpage"];
+
+  // Hide navbar on admin routes
+  if (
+    hideNavbarPaths.includes(location.pathname) ||
+    location.pathname.startsWith("/admin")
+  ) {
+    return null;
+  }
 
   const toggleNavbar = () => setMobileDrawerOpen(!mobileDrawerOpen);
 
@@ -97,12 +118,6 @@ const Navbar = () => {
                 <Link to="/login" className="py-2 px-3 border rounded-md">
                   Login
                 </Link>
-                {/* <Link
-                  to="/signup"
-                  className="py-2 px-3 rounded-md bg-gradient-to-r from-orange-500 to-orange-800 text-white"
-                >
-                  Sign Up
-                </Link> */}
               </>
             )}
 
@@ -185,27 +200,52 @@ const Navbar = () => {
 
         {/* MOBILE DRAWER */}
         {mobileDrawerOpen && (
-          <div className="fixed top-0 right-0 w-full h-screen bg-neutral-900 p-12 flex flex-col items-center space-y-8">
-            <ul className="space-y-6 text-2xl">
+          <div className="fixed inset-0 z-50 bg-neutral-900 p-6 flex flex-col">
+
+            {/* TOP BAR */}
+            <div className="flex justify-between items-center mb-10">
+              <span className="text-lg font-semibold text-white">Menu</span>
+
+              <button
+                onClick={() => setMobileDrawerOpen(false)}
+                className="p-2 rounded-md hover:bg-neutral-800"
+                aria-label="Close menu"
+              >
+                <X size={26} />
+              </button>
+            </div>
+
+            {/* NAV LINKS */}
+            <ul className="space-y-6 text-2xl text-center flex-1">
               {navItems.map((item) => (
                 <li key={item.label}>
-                  <Link to={item.href} onClick={() => setMobileDrawerOpen(false)}>
+                  <Link
+                    to={item.href}
+                    onClick={() => setMobileDrawerOpen(false)}
+                    className="block hover:text-orange-500 transition"
+                  >
                     {item.label}
                   </Link>
                 </li>
               ))}
             </ul>
 
+            {/* USER SECTION */}
             {!loading && user && (
-              <div className="mt-8 text-center">
+              <div className="pt-6 border-t border-neutral-800 text-center">
                 <div className="w-14 h-14 rounded-full bg-orange-600 text-white flex items-center justify-center text-xl font-bold mx-auto">
                   {getInitial(user.displayName || user.email)}
                 </div>
 
-                <p className="text-white mt-2">Welcome, {user.displayName || user.email}</p>
+                <p className="text-white mt-3 truncate">
+                  {user.displayName || user.email}
+                </p>
 
                 <button
-                  onClick={handleLogout}
+                  onClick={() => {
+                    handleLogout();
+                    setMobileDrawerOpen(false);
+                  }}
                   className="mt-4 w-40 py-2 bg-red-600 rounded-md text-white"
                 >
                   Logout
@@ -213,18 +253,17 @@ const Navbar = () => {
               </div>
             )}
 
+            {/* AUTH (NO USER) */}
             {!loading && !user && (
-              <>
-                <Link to="/login" className="w-40 py-3 border rounded-md text-center">
+              <div className="pt-6 border-t border-neutral-800 text-center">
+                <Link
+                  to="/login"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="inline-block w-40 py-3 border rounded-md"
+                >
                   Login
                 </Link>
-                {/* <Link
-                  to="/signup"
-                  className="w-40 py-3 rounded-md bg-gradient-to-r from-orange-500 to-orange-800 text-center"
-                >
-                  Sign Up
-                </Link> */}
-              </>
+              </div>
             )}
           </div>
         )}

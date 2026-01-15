@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { Send, Menu, X, History, Plus, ChevronsLeft, ChevronsRight, Crown } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { FiTrash2, FiSun, FiMoon } from "react-icons/fi";
+
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
@@ -74,6 +76,44 @@ export default function ChatPage() {
       navigate("/login");
     }
   };
+
+  // ✅ DELETE CHAT (Frontend)
+  const deleteChat = async (chatId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const res = await fetch(
+        `http://localhost:5000/api/chat/${chatId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to delete chat");
+      }
+
+      // 🔥 Update UI instantly (no reload)
+      setChatHistory((prev) =>
+        prev.filter((chat) => chat._id !== chatId)
+      );
+
+      // Optional: clear messages if current chat was deleted
+      setMessages((prev) =>
+        prev.length && prev === chatId ? [] : prev
+      );
+
+    } catch (err) {
+      console.error("Delete chat error:", err);
+      alert("Failed to delete chat");
+    }
+  };
+
+
 
   // Fetch chat history and user count
   const fetchHistory = async (token = null) => {
@@ -188,6 +228,7 @@ export default function ChatPage() {
       setTyping(false);
     }
   };
+
 
   // Countdown for next allowed message
   const startCountdown = () => {
@@ -334,98 +375,107 @@ export default function ChatPage() {
   const newChat = () => setMessages([]);
 
   // Auto-scroll
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
 
-  if (loading) return <div className="text-white p-6">Loading...</div>;
+  useEffect(() => {
+    const handleScroll = () => {
+      const el = document.documentElement;
+      const nearBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+
+      setShouldAutoScroll(nearBottom);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
 
   return (
     <div className={`min-h-screen flex ${theme === "dark" ? "bg-[#0f0f0f] text-white" : "bg-gray-50 text-gray-900"}`}>
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} fixed md:static top-0 left-0 h-full ${sidebarMini ? "w-20" : "w-64"} bg-[#1a1a1a] border-r border-gray-800 transition-all duration-300 z-50`}>
-        {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b border-gray-800">
-          {!sidebarMini && (
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              <History size={18} /> History
-            </h2>
-          )}
-          <div className="flex gap-2">
-            <button className="hidden md:block" onClick={() => setSidebarMini(!sidebarMini)}>
-              {sidebarMini ? <ChevronsRight size={22} /> : <ChevronsLeft size={22} />}
-            </button>
-            <button className="md:hidden" onClick={() => setSidebarOpen(false)}>
-              <X size={22} />
+      <div
+        className={`
+           fixed top-0 left-0 h-screen
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+            ${sidebarMini ? "w-20" : "w-64"}
+          bg-[#1a1a1a] border-r border-gray-800
+            transition-all duration-300 z-50
+            `}
+      >
+        <div className="flex flex-col h-full">
+
+          {/* Header */}
+          <div className="flex justify-between items-center p-4 border-b border-gray-800">
+            {!sidebarMini && (
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <History size={18} /> History
+              </h2>
+            )}
+            <div className="flex gap-2">
+              <button
+                className="hidden md:block"
+                onClick={() => setSidebarMini(!sidebarMini)}
+              >
+                {sidebarMini ? <ChevronsRight size={22} /> : <ChevronsLeft size={22} />}
+              </button>
+              <button className="md:hidden" onClick={() => setSidebarOpen(false)}>
+                <X size={22} />
+              </button>
+            </div>
+          </div>
+
+          {/* New Chat */}
+          <div className="p-4 border-b border-gray-800">
+            <button
+              onClick={newChat}
+              className="flex items-center gap-2 bg-orange-500/20 hover:bg-orange-500/40 px-3 py-2 rounded-md w-full text-sm"
+            >
+              <Plus size={16} /> {!sidebarMini && "New Chat"}
             </button>
           </div>
-        </div>
 
-        {/* New Chat */}
-        <div className="p-4 border-b border-gray-800">
-          <button onClick={newChat} className="flex items-center gap-2 bg-orange-500/20 hover:bg-orange-500/40 px-3 py-2 rounded-md w-full text-sm">
-            <Plus size={16} /> {!sidebarMini && "New Chat"}
-          </button>
-        </div>
+          {/* ✅ ONLY scrollable area */}
+          <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3">
+            {chatHistory.length === 0 && !sidebarMini && (
+              <p className="text-gray-400 text-sm">No chats yet.</p>
+            )}
 
-        {/* History list */}
-        <div className="overflow-y-auto h-[calc(100%-7rem)] p-4 space-y-3">
-          {Array.isArray(chatHistory) && chatHistory.length === 0 && (
-            <p className="text-gray-400 text-sm">{!sidebarMini && "No chats yet."}</p>
-          )}
-          {Array.isArray(chatHistory) &&
-            chatHistory.map((chat, i) => (
-              <div key={i} onClick={() => loadChat(chat)} className="cursor-pointer bg-white/10 hover:bg-orange-500/40 p-3 rounded-lg text-sm line-clamp-2">
-                {chat.messages?.[1]?.content || "Conversation"}
+            {chatHistory.map((chat) => (
+              <div
+                key={chat._id}
+                onClick={() => loadChat(chat)}
+                className="group flex justify-between items-center
+               bg-white/5 hover:bg-orange-500/30
+                  p-3 rounded-lg cursor-pointer"
+              >
+                <span className="text-sm line-clamp-2 flex-1">
+                  {chat.messages?.[1]?.content || "Conversation"}
+                </span>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteChat(chat._id);
+                  }}
+                  className="opacity-0 group-hover:opacity-100
+                  text-red-400 hover:text-red-500 ml-2"
+                >
+                  <FiTrash2 size={18} />
+                </button>
               </div>
             ))}
+          </div>
+
         </div>
       </div>
 
+
       {/* Main Chat Area */}
-      <div className="flex-1 relative flex flex-col">
-        {/* Top bar (mobile) */}
-        <div className="flex items-center justify-between px-4 py-3 bg-[#1a1a1a] border-b border-gray-800 md:hidden">
-          <button onClick={() => setSidebarOpen(true)}>
-            <Menu size={22} />
-          </button>
-          <h1 className="text-lg font-bold">VedAI</h1>
-          {userRole === "free" && (
-            <button
-              onClick={handleUpgradeClick}
-              className="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-red-600 px-3 py-1 rounded-lg text-xs font-semibold"
-            >
-              <Crown size={12} />
-              Upgrade
-            </button>
-          )}
-        </div>
-
-        {/* Desktop Upgrade Button */}
-        <div className="hidden md:flex items-center justify-between px-6 py-4 bg-[#1a1a1a] border-b border-gray-800">
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
-              <span className="text-white font-bold">V</span>
-            </div>
-            VedAI
-          </h1>
-          {userRole === "free" && (
-            <button
-              onClick={handleUpgradeClick}
-              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
-            >
-              <Crown size={16} />
-              Upgrade to Premium
-            </button>
-          )}
-          {userRole === "premium" && (
-            <span className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-700 px-4 py-2 rounded-full text-sm">
-              <Crown size={14} />
-              Premium User
-            </span>
-          )}
-        </div>
-
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300
+        ${sidebarMini ? "md:ml-[72px]" : "md:ml-[260px]"}`}
+      >
         {/* Chat messages container */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
           {/* Limit reached warning */}
@@ -597,42 +647,6 @@ export default function ChatPage() {
               );
             })}
 
-            {/* Typing indicator */}
-            {typing && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex justify-start"
-              >
-                <div className="max-w-[85%] w-full bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-2xl rounded-tl-none shadow-xl overflow-hidden">
-                  <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-800 to-gray-900 border-b border-gray-700">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
-                      <span className="text-white font-bold">V</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-100">VedAI</h3>
-                      <p className="text-xs text-gray-400">AI Spiritual Guide</p>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-center gap-2">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150"></div>
-                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-300"></div>
-                      </div>
-                      <span className="text-gray-400 ml-2">Thinking...</span>
-                      <button
-                        onClick={() => setStopTyping(true)}
-                        className="ml-auto text-sm text-gray-500 hover:text-gray-300 px-3 py-1 rounded-md hover:bg-gray-800 transition-colors"
-                      >
-                        Stop
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
           </div>
           <div ref={chatEndRef} />
         </div>
@@ -642,11 +656,22 @@ export default function ChatPage() {
           <div className="mx-auto max-w-3xl">
             <div className="flex items-center gap-3">
               <div className="flex-1 relative">
-                <input
-                  type="text"
+                <textarea
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+
+                    // Auto-grow height
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                  rows={1}
                   placeholder={
                     userRole === "premium"
                       ? "💫 Ask VedAI anything (Premium User)"
@@ -654,13 +679,18 @@ export default function ChatPage() {
                         ? "⏳ Upgrade to Premium for unlimited access"
                         : `Ask your spiritual question... (${FREE_CHAT_LIMIT - chatCount} left today)`
                   }
-                  className="w-full px-5 py-3.5 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={limitReached && userRole === "free"}
+                  className=" w-full px-5 py-3.5 rounded-xl  bg-gray-900 border border-gray-700 
+                  text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent
+                    disabled:opacity-50 disabled:cursor-not-allowed resize-none overflow-hidden leading-relaxed "
+                  style={{ maxHeight: "180px" }} // same as ChatGPT
                 />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+
+                <div className="absolute right-3 bottom-3 text-gray-500 text-sm">
                   {!input.trim() ? "⏎" : "⌘⏎"}
                 </div>
               </div>
+
 
               <button
                 onClick={sendMessage}
@@ -675,14 +705,19 @@ export default function ChatPage() {
                   onClick={toggleTheme}
                   className="p-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
                 >
-                  {theme === "dark" ? "🌞" : "🌙"}
+                  {theme === "dark" ? (
+                    <FiSun className="text-yellow-400 text-xl" />
+                  ) : (
+                    <FiMoon className="text-blue-400 text-xl" />
+                  )}
+
                 </button>
                 <button
                   onClick={() => setMessages([])}
                   className="p-2.5 rounded-lg bg-gray-800 hover:bg-red-900/30 text-red-400 hover:text-red-300 transition-colors"
                   title="Clear conversation"
                 >
-                  🗑️
+                  <FiTrash2 size={18} />
                 </button>
               </div>
             </div>
@@ -698,79 +733,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Payment Modal */}
-      {showPaymentModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="relative w-full max-w-md bg-gradient-to-br from-orange-50 to-amber-100 rounded-3xl shadow-2xl overflow-hidden"
-          >
-            {/* Header */}
-            <div className="relative p-6 bg-gradient-to-r from-orange-500 to-red-600 text-white">
-              <button
-                onClick={() => setShowPaymentModal(false)}
-                className="absolute top-4 right-4 text-white hover:text-orange-200"
-              >
-                <X size={24} />
-              </button>
-              <h2 className="text-2xl font-bold mb-2">🚀 Upgrade to Premium</h2>
-              <p className="text-orange-100">Unlock unlimited spiritual guidance</p>
-            </div>
 
-            {/* Plans */}
-            <div className="p-6 space-y-4">
-              <div
-                onClick={() => initiatePayment("monthly")}
-                className="p-4 border-2 border-orange-300 rounded-xl cursor-pointer hover:border-orange-500 transition-all bg-white"
-              >
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Monthly Plan</h3>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-3xl font-bold text-orange-600">₹299</span>
-                  <span className="text-gray-500 line-through">₹499</span>
-                  <span className="text-green-600 text-sm font-bold">40% off</span>
-                </div>
-                <p className="text-gray-600 text-sm">per month</p>
-                <ul className="mt-3 space-y-2 text-sm text-gray-700">
-                  <li>✓ Unlimited AI chats</li>
-                  <li>✓ Daily Bhagavad Gita guidance</li>
-                  <li>✓ Personalized horoscope</li>
-                  <li>✓ Priority support</li>
-                </ul>
-              </div>
-
-              <div
-                onClick={() => initiatePayment("yearly")}
-                className="p-4 border-2 border-orange-500 rounded-xl cursor-pointer hover:border-orange-600 transition-all bg-orange-50 relative"
-              >
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                    BEST VALUE
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Yearly Plan</h3>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-3xl font-bold text-orange-600">₹2999</span>
-                  <span className="text-gray-500 line-through">₹5988</span>
-                  <span className="text-green-600 text-sm font-bold">50% off</span>
-                </div>
-                <p className="text-gray-600 text-sm">per year</p>
-                <ul className="mt-3 space-y-2 text-sm text-gray-700">
-                  <li>✓ Everything in Monthly</li>
-                  <li>✓ Yearly savings</li>
-                  <li>✓ Exclusive content access</li>
-                  <li>✓ Early feature access</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Security Note */}
-            <div className="p-4 text-center text-gray-600 text-sm border-t">
-              🔒 Secure payment powered by Razorpay
-            </div>
-          </motion.div>
-        </div>
-      )}
     </div>
   );
 }

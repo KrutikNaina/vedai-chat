@@ -14,6 +14,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -54,6 +55,7 @@
   color: white;
   transition: all 0.2s ease;
 }
+
 .icon-btn:hover {
   transform: scale(1.1);
 }
@@ -67,7 +69,18 @@
   font-size: 13px;
   color: #ddd;
 }
+
 .editor-btn:hover {
   background: #ff6a00;
   color: black;
+}
+
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
 }

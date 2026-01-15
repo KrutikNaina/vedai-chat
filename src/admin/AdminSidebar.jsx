@@ -1,8 +1,9 @@
-// vedai-landing\src\admin\AdminSidebar.jsx
-import { Link, useLocation } from "react-router-dom";
+// vedai-landing/src/admin/AdminSidebar.jsx
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function AdminSidebar() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   const linkClass = (path) =>
     `block px-4 py-2 rounded-lg mb-2 ${
@@ -11,15 +12,52 @@ export default function AdminSidebar() {
         : "bg-neutral-900 hover:bg-neutral-800"
     }`;
 
-  return (
-    <aside className="w-64 bg-neutral-900 border-r border-neutral-800 p-4">
-      <h1 className="text-xl font-bold text-orange-500 mb-6">VedAI Admin</h1>
+  const handleLogout = () => {
+    if (!confirm("Logout from admin panel?")) return;
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
 
-      <Link to="/admin" className={linkClass("/admin")}>Dashboard</Link>
-      <Link to="/admin/users" className={linkClass("/admin/users")}>Users</Link>
-      <Link to="/admin/katha" className={linkClass("/admin/katha")}>Katha Manager</Link>
-      <Link to="/admin/blog" className={linkClass("/admin/blogs")}>Blog Manager</Link>
-      <Link to="/admin/api-logs" className={linkClass("/admin/api-logs")}>API Logs</Link>
+  return (
+    <aside className="w-64 bg-neutral-900 border-r border-neutral-800 p-4 flex flex-col">
+      <h1 className="text-xl font-bold text-orange-500 mb-6">
+        VedAI Admin
+      </h1>
+
+      {/* NAV LINKS */}
+      <div className="flex-1">
+        <Link to="/admin" className={linkClass("/admin")}>
+          Dashboard
+        </Link>
+
+        <Link to="/admin/users" className={linkClass("/admin/users")}>
+          Users
+        </Link>
+
+        <Link to="/admin/katha" className={linkClass("/admin/katha")}>
+          Katha Manager
+        </Link>
+
+        <Link to="/admin/blog" className={linkClass("/admin/blog")}>
+          Blog Manager
+        </Link>
+
+        <Link to="/admin/api-logs" className={linkClass("/admin/api-logs")}>
+          API Logs
+        </Link>
+
+        <Link to="/admin/contacts" className={linkClass("/admin/contacts")}>
+          Contact
+        </Link>
+      </div>
+
+      {/* LOGOUT */}
+      <button
+        onClick={handleLogout}
+        className="mt-4 px-4 py-2 rounded-lg text-left text-red-400 hover:bg-red-600/20"
+      >
+        Logout
+      </button>
     </aside>
   );
 }

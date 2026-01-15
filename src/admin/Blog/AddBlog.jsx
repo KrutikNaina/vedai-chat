@@ -52,6 +52,25 @@ export default function AddBlog() {
             console.error(err);
             alert("Failed to create blog");
         }
+
+        const uploadCover = async (file) => {
+            const data = new FormData();
+            data.append("image", file);
+
+            const res = await axios.post(
+                "http://localhost:5000/api/upload/image",
+                data,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
+            setForm({ ...form, coverImage: res.data.url });
+        };
+
     };
 
     return (
@@ -59,7 +78,7 @@ export default function AddBlog() {
             {/* Header */}
             <div>
                 <h1 className="text-3xl font-bold text-orange-500">
-                    ✍️ Create Blog Post
+                     Create Blog Post
                 </h1>
                 <p className="text-neutral-400 mt-1">
                     Write SEO-optimized spiritual content for VedAI
@@ -95,12 +114,12 @@ export default function AddBlog() {
 
                 {/* Cover Image */}
                 <div>
-                    <label className="label">Cover Image URL</label>
+                    <label className="label">Cover Image</label>
+
                     <input
-                        value={form.coverImage}
-                        onChange={(e) =>
-                            setForm({ ...form, coverImage: e.target.value })
-                        }
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => uploadCover(e.target.files[0])}
                         className="input"
                     />
 
@@ -112,6 +131,7 @@ export default function AddBlog() {
                         />
                     )}
                 </div>
+
 
                 {/* Category + Status */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,7 +179,7 @@ export default function AddBlog() {
                     />
                 </div>
 
-                {/* ✅ MARKDOWN EDITOR (REPLACED TEXTAREA) */}
+                {/*  MARKDOWN EDITOR (REPLACED TEXTAREA) */}
                 <div>
                     <label className="label">Blog Content</label>
                     <MarkdownEditor
@@ -174,7 +194,7 @@ export default function AddBlog() {
             {/* SEO CARD */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 space-y-4">
                 <h2 className="text-lg font-semibold text-orange-400">
-                    🔍 SEO Optimization
+                     SEO Optimization
                 </h2>
 
                 <input

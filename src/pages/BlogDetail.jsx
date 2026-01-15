@@ -32,6 +32,6 @@ export default function BlogDetail() {
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
       </article>
-    </>
+    </> 
   );
 }

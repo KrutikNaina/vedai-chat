@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { Eye, Pencil, Trash2, Plus } from "lucide-react";
+import api from "../.././utils/api";
 
 export default function BlogList() {
   const [blogs, setBlogs] = useState([]);
