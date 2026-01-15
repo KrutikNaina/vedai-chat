@@ -224,16 +224,15 @@ const Login = () => {
         </button>
 
         {/* Divider */}
-        <div className="flex items-center my-6">
+        {/* <div className="flex items-center my-6">
           <hr className="flex-grow border-neutral-700" />
           <span className="mx-4 text-neutral-500 text-sm">OR</span>
           <hr className="flex-grow border-neutral-700" />
-        </div>
+        </div> */}
 
         {/* FORM */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* EMAIL FIELD */}
           <motion.div animate={emailError ? shakeAnimation : {}}>
             <input
               name="email"
@@ -246,7 +245,6 @@ const Login = () => {
             {emailError && <p className="text-red-400 text-sm mt-1">{emailError}</p>}
           </motion.div>
 
-          {/* PASSWORD FIELD */}
           <motion.div animate={passError ? shakeAnimation : {}}>
             <div className="relative">
               <input
@@ -258,7 +256,6 @@ const Login = () => {
                   focus:border-orange-500 focus:ring focus:ring-orange-500/40 outline-none transition`}
               />
 
-              {/* SHOW/HIDE PASSWORD */}
               <span
                 onClick={() => setShowPass(!showPass)}
                 className="absolute right-4 top-3 cursor-pointer text-neutral-400 hover:text-orange-400 transition"
@@ -270,7 +267,6 @@ const Login = () => {
             {passError && <p className="text-red-400 text-sm mt-1">{passError}</p>}
           </motion.div>
 
-          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={comingSoon}
@@ -283,13 +279,12 @@ const Login = () => {
             {comingSoon ? "Coming Soon" : "Login"}
           </button>
 
-        </form>
+        </form> */}
 
-        {/* SIGNUP LINK */}
-        <p className="mt-6 text-center text-neutral-500 text-sm">
+        {/* <p className="mt-6 text-center text-neutral-500 text-sm">
           Don't have an account?{" "}
           <a href="/signup" className="text-orange-500 hover:underline">Sign up</a>
-        </p>
+        </p> */}
       </motion.div>
     </section>
   );
